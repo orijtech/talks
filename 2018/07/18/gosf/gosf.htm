@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)http://127.0.0.1:3999/talk.slide#17 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>OpenCensus</title>
+    
+    <script>
+      var notesEnabled =  false ;
+    </script>
+    <script src="./gosf_files/slides.js"></script>
+
+    
+
+    <script>
+      
+      if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+        var _gaq = _gaq || [];
+        _gaq.push(["_setAccount", "UA-11222381-6"]);
+        _gaq.push(["b._setAccount", "UA-49880327-6"]);
+        window.trackPageview = function() {
+          _gaq.push(["_trackPageview", location.pathname+location.hash]);
+          _gaq.push(["b._trackPageview", location.pathname+location.hash]);
+        };
+        window.trackPageview();
+        window.trackEvent = function(category, action, opt_label, opt_value, opt_noninteraction) {
+          _gaq.push(["_trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+          _gaq.push(["b._trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+        };
+      }
+    </script>
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1"><meta name="apple-mobile-web-app-capable" content="yes"></head>
+
+  <body style="display: none" class="loaded">
+
+  
+    <section class="slides layout-widescreen" style="transform: scale(0.557333);">
+  
+
+      <article class="">
+        <h1>OpenCensus</h1>
+        <h3>Planet scale observability with OpenCensus</h3>
+        <h3>18 July 2018</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+  
+  
+      <article class="">
+      
+        <h3>About myself</h3>
+        
+  <ul>
+  
+    <li>Emmanuel Odeke</li>
+  
+    <li>Working on Go, OpenCensus and the cloud at Orijtech, Inc</li>
+  
+    <li>Avid open source software consumer and producer</li>
+  
+    <li>Always learning!</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>What is OpenCensus?</h3>
+        
+<div class="image">
+  <img src="./gosf_files/opencensus-logo.png">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>OpenCensus</h3>
+        
+  <ul>
+  
+    <li>OpenCensus is a vendor-agnostic single distribution of libraries for distributed tracing and metrics</li>
+  
+    <li>The work of a collective, talented and vibrant community</li>
+  
+    <li>Entirely open source rewrite of the observability systems that have powered Google’s production systems for the past 10 years:</li>
+  
+  </ul>
+
+  
+  <div class="code"><pre>Dapper —&gt; Census —&gt; OpenCensus</pre></div>
+  
+
+  <ul>
+  
+    <li>Collect metrics and traces singly, export to various backends of your choice</li>
+  
+    <li>Exporters/backends include AWS X-Ray, Instana, DataDog, Google Stackdriver Tracing and Monitoring, Prometheus, Zipkin, Jaeger, SignalFX</li>
+  
+    <li>zPages for live introspection</li>
+  
+    <li>For microservices and monoliths alike!</li>
+  
+    <li>It is implemented in Go, Java, Python, C++, PHP, Ruby, Node.js, C#(almost finished)</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Why OpenCensus?</h3>
+        
+  <ul>
+  
+    <li>Observability means the ability to infer/examine the states of your system from external signals</li>
+  
+    <li>Polyglot microservices are the latest norm and direction of the future</li>
+  
+    <li>Monitoring and logging for monoliths is nice and simple but on breaking out into microservices things get very complex</li>
+  
+    <li>Lessons from Google running their systems at planet scale for the past 10 years</li>
+  
+    <li>Striving for low latency, API compatibility and simplicity</li>
+  
+    <li>Too much churn from vendor lock-in and specialized language support e.g. when integrating libraries, during acquisitions</li>
+  
+    <li>High cognitive load if expecting every single team member to learn how implement tracing and metrics internals</li>
+  
+    <li>Reduce "bus factor" for distributed systems so that teams can specialize and focus on their work</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Planet scale observability?</h3>
+        
+  <ul>
+  
+    <li>Low latency</li>
+  
+    <li>Live introspection</li>
+  
+    <li>Provides metrics to enable monitoring</li>
+  
+    <li>Helps answers questions what is going on? What went wrong?</li>
+  
+    <li>No need for distributed systems expertise -- important for making teams effective</li>
+  
+    <li>No vendor lock-in</li>
+  
+    <li>Validated ideas from running at planet scale, and this work is now open source</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Go version</h3>
+        
+  <ul>
+  
+    <li><a href="https://godoc.org/go.opencensus.io" target="_blank">https://godoc.org/go.opencensus.io</a></li>
+  
+    <li><a href="https://github.com/census-instrumentation/opencensus-go" target="_blank">https://github.com/census-instrumentation/opencensus-go</a></li>
+  
+    <li>HTTP and gRPC support out of the box!</li>
+  
+    <li>Support for exporting traces and metrics to Prometheus, AWS X-Ray, DataDog, Google Stackdriver Tracing and Monitoring, Zipkin, Jaeger</li>
+  
+  </ul>
+
+<div class="image">
+  <img src="./gosf_files/opencensus-go-logo.png" width="400">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Concepts</h3>
+        
+  <ul>
+  
+    <li>Tracing</li>
+  
+    <li>Metrics</li>
+  
+    <li>zPages</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h2>Tracing</h2>
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Tracing</h3>
+        
+  <ul>
+  
+    <li>A finite tracking of the journey that a request takes across RPC/function boundaries</li>
+  
+    <li>Enabled by a process called "context propagation" which is handled by the underlying transport</li>
+  
+    <li>Consists of "traces"</li>
+  
+    <li>Span: a stride descriptive of the progress of a request</li>
+  
+    <li>A span can have have a parent span</li>
+  
+    <li>Span without a parent is a "root span" while a span with a parent is a "child span"</li>
+  
+    <li>Spans can be annotated with a description and attributes to mark a time event</li>
+  
+    <li>A trace's unit element is a "Span". Uniquely identified by TraceID</li>
+  
+    <li>Thus a "Trace" is a tree of spans, whose events depict a request's flow</li>
+  
+    <li>Traces are usually "sampled" i.e. a proportion of traces is chosen, the rest are discarded</li>
+  
+    <li>Sampling is meant to alleviate processing and storage costs</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Trace integrations</h3>
+        
+  <ul>
+  
+    <li>Context propagation: think the use of "context.Context"</li>
+  
+    <li>TraceID, SpanID, ParentSpanID encoded and sent over the wire or in the "context.Context"</li>
+  
+    <li>Propagations include B3/Zipkin propagation and CloudTrace propagation</li>
+  
+    <li>HTTP integration <a href="https://godoc.org/go.opencensus.io/plugin/ochttp" target="_blank">https://godoc.org/go.opencensus.io/plugin/ochttp</a></li>
+  
+    <li>gRPC integration <a href="https://godoc.org/go.opencensus.io/plugin/ocgrpc" target="_blank">https://godoc.org/go.opencensus.io/plugin/ocgrpc</a></li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>What does a trace look like?</h3>
+        
+  
+  <p>
+    Given an app
+  </p>
+  
+
+<div class="image">
+  <img src="./gosf_files/architecture.jpg" width="950">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Tracing code</h3>
+        
+  <div class="code">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "log"</span>
+<span num="5">    "net/http"</span>
+<span num="6"></span>
+<span num="7">    "go.opencensus.io/plugin/ochttp"</span>
+<span num="8">    "go.opencensus.io/trace"</span>
+<span num="9">)</span>
+<span num="10"></span>
+<span num="11">func main() {</span>
+<span num="12">    h := &amp;ochttp.Handler{Handler: http.HandlerFunc(search)}</span>
+<span num="13">    if err := http.ListenAndServe(":8080", h); err != nil {</span>
+<span num="14">        log.Fatalf("Failed to listen and serve: %v", err)</span>
+<span num="15">    }</span>
+<span num="16">}</span>
+<span num="17"></span>
+<span num="18">func search(w http.ResponseWriter, r *http.Request) {</span>
+<span num="19">    ctx, span := trace.StartSpan(r.Context(), "Search")</span>
+<span num="20">    defer span.End()</span>
+<span num="21"></span>
+<span num="22">    // Use the context and the rest of the code goes below</span>
+<span num="23">    _ = ctx</span>
+<span num="24">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Trace dissection</h3>
+        
+<div class="image">
+  <img src="./gosf_files/trace-visuals.png" width="620">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="far-past">
+      
+        <h3>How did we get that?</h3>
+        
+  <ul>
+  
+    <li>Enabled an exporter: for this demo, I used Stackdriver Tracing</li>
+  
+  </ul>
+
+  <div class="code">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "log"</span>
+<span num="5"></span>
+<span num="6">    "contrib.go.opencensus.io/exporter/stackdriver"</span>
+<span num="7">    "go.opencensus.io/trace"</span>
+<span num="8">)</span>
+<span num="9"></span>
+<span num="10">func main() {</span>
+<span num="11">    sd, err := stackdriver.NewExporter(stackdriver.Options{ProjectID: "census-demos"})</span>
+<span num="12">    if err != nil {</span>
+<span num="13">        log.Fatalf("Failed to register Stackdriver Trace exporter: %v", err)</span>
+<span num="14">    }</span>
+<span num="15">    trace.RegisterExporter(sd)</span>
+<span num="16">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="past">
+      
+        <h3>Available trace exporters</h3>
+        
+  <ul>
+  
+    <li>AWS X-Ray <a href="https://godoc.org/github.com/census-instrumentation/opencensus-go-exporter-aws" target="_blank">https://godoc.org/github.com/census-instrumentation/opencensus-go-exporter-aws</a></li>
+  
+    <li>DataDog <a href="https://godoc.org/github.com/DataDog/opencensus-go-exporter-datadog" target="_blank">https://godoc.org/github.com/DataDog/opencensus-go-exporter-datadog</a></li>
+  
+    <li>Jaeger <a href="https://godoc.org/go.opencensus.io/exporter/jaeger" target="_blank">https://godoc.org/go.opencensus.io/exporter/jaeger</a></li>
+  
+    <li>Zipkin <a href="https://godoc.org/go.opencensus.io/exporter/zipkin" target="_blank">https://godoc.org/go.opencensus.io/exporter/zipkin</a></li>
+  
+    <li>Google Stackdriver Tracing <a href="https://godoc.org/contrib.go.opencensus.io/exporter/stackdriver" target="_blank">https://godoc.org/contrib.go.opencensus.io/exporter/stackdriver</a></li>
+  
+    <li>[Insert your backend here] -- see the next slide for how to create one!</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="current">
+      
+        <h3>Creating a custom trace exporter -- this could be yours!</h3>
+        
+  <div class="code playground">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "context"</span>
+<span num="5">    "fmt"</span>
+<span num="6">    "time"</span>
+<span num="7"></span>
+<span num="8">    "go.opencensus.io/trace"</span>
+<span num="9">)</span>
+<span num="10"></span>
+<span num="11">type customPrintExporter int</span>
+<span num="12"></span>
+<span num="13">func (ce *customPrintExporter) ExportSpan(sd *trace.SpanData) {</span>
+<span num="14">    fmt.Printf("Name: %s\nTraceID: %x\nSpanID: %x\nParentSpanID: %x\nStartTime: %s\nEndTime: %s\nAnnotations: %+v\n",</span>
+<span num="15">        sd.Name, sd.TraceID, sd.SpanID, sd.ParentSpanID, sd.StartTime, sd.EndTime, sd.Annotations)</span>
+<span num="16">}</span>
+<span num="17"></span>
+<span num="18">func main() {</span>
+<span num="19">    trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(0.999)})</span>
+<span num="20">    trace.RegisterExporter(new(customPrintExporter))</span>
+<span num="21">    _, span := trace.StartSpan(context.Background(), "sample")</span>
+<span num="22">    span.Annotate([]trace.Attribute{trace.Int64Attribute("invocations", 1)}, "Invoked it")</span>
+<span num="23">    span.End()</span>
+<span num="24">    &lt;-time.After(500 * time.Millisecond)</span>
+<span num="25">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run" style="display: none;">Run</button></div><div class="ui-resizable output" style="display: block;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre><span class="stdout">Name: sample
+TraceID: 3934363535316338633035643463373533333963623135363234316233363964
+SpanID: 35366562303561373638363336303331
+ParentSpanID: 30303030303030303030303030303030
+StartTime: 2018-07-19 03:45:03.081946 -0700 PDT m=+0.000799779
+EndTime: 2018-07-19 03:45:03.081971099 -0700 PDT m=+0.000824878
+Annotations: [{Time:2018-07-19 03:45:03.081952 -0700 PDT m=+0.000805604 Message:Invoked it Attributes:map[invocations:1]}]
+</span><span class="system">
+Program exited.</span></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article class="next">
+      
+        <h2>Metrics/Stats</h2>
+      
+      </article>
+  
+  
+  
+      <article class="far-next">
+      
+        <h3>Metrics/Stats</h3>
+        
+  <ul>
+  
+    <li>Any quantifiable entity on your backend, for example:</li>
+  
+    <li>Number of requests, responses, errors</li>
+  
+    <li>Latency, number of files open and closed, number of certificates etc</li>
+  
+    <li>Aggregatable in the form of counts and distributions</li>
+  
+    <li>Tags: key-value pairs to attach distinguishing information to a metric e.g. ip="10.0.0.4", driver="mysql", service="gmail"</li>
+  
+    <li>In a high traffic environment, there is a very high cognitive load for developers to examine each discrete value</li>
+  
+    <li>Can use aggregations as well as alerts to aid you e.g. if latency &gt; 3s or no requests recorded for 2 minutes</li>
+  
+    <li>Support through the "stats" package <a href="https://godoc.org/go.opencensus.io/stats" target="_blank">https://godoc.org/go.opencensus.io/stats</a></li>
+  
+    <li>The API exports "Measures" stats.Float64 and stats.Int64 to record doubles and int* values respectively</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Metrics/stats</h3>
+        
+  <div class="code">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "context"</span>
+<span num="5">    "time"</span>
+<span num="6"></span>
+<span num="7">    "go.opencensus.io/stats"</span>
+<span num="8">    "go.opencensus.io/tag"</span>
+<span num="9">)</span>
+<span num="10"></span>
+<span num="11">var MRequestsIn = stats.Int64("demo/requests", "The number of requests received", "1")</span>
+<span num="12">var MLatency = stats.Float64("demo/latency", "The number of seconds to process an entity", "ms")</span>
+<span num="13">var KeyMethod, _ = tag.NewKey("method")</span>
+<span num="14"></span>
+<span num="15">func search(w http.ResponseWriter, r *http.Request) {</span>
+<span num="16">    ctx, _ = tag.New(ctx, tag.Insert(KeyMethod, "search"))</span>
+<span num="17">    startTime := time.Now()</span>
+<span num="18">    defer func() {</span>
+<span num="19">        endTimeMs := float64(time.Since(startTime).Nanoseconds()) / 1e6</span>
+<span num="20">        // Record the stats here</span>
+<span num="21">        stats.Record(ctx, MRequestsIn.M(1), MLatency.M(endTimeMs))</span>
+<span num="22">    }()</span>
+<span num="23">    // Search logic below...</span>
+<span num="24">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Metrics/stats: Introspection and aggregation of metrics with views</h3>
+        
+  <ul>
+  
+    <li>Combining a measure, a name, tags and an aggregation(count or distribution) to examine a metric/stat</li>
+  
+  </ul>
+
+  <div class="code">
+
+
+<pre><span num="1">import (</span>
+<span num="2">    "go.opencensus.io/stats"</span>
+<span num="3">    "go.opencensus.io/view"</span>
+<span num="4">)</span>
+<span num="5"></span>
+<span num="6">var LatencyView = &amp;view.View{</span>
+<span num="7">    Measure: MLatency, Name: "demo/latency", Description: "Latency per call",</span>
+<span num="8">    TagKeys:     []tag.Key{KeyMethod},</span>
+<span num="9">    Aggregation: view.Distribution(0, 5, 10, 20, 50, 100, 200, 300, 500, 800),</span>
+<span num="10">}</span>
+<span num="11">var RequestsView = &amp;view.View{Measure: MRequestsIn, Name: "demo/requests",</span>
+<span num="12">    Description: "Number of requests", Aggregation: view.Count(),</span>
+<span num="13">}</span>
+<span num="14"></span>
+<span num="15">func init() {</span>
+<span num="16">    if err := view.Register(LatencyView, RequestsView); err != nil {</span>
+<span num="17">        log.Fatalf("Failed to register custom views: %v", err)</span>
+<span num="18">    }</span>
+<span num="19">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Metrics dissection</h3>
+        
+<div class="image">
+  <img src="./gosf_files/stats-visuals.png" width="980">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>How did we get that?</h3>
+        
+  <ul>
+  
+    <li>Enabled an exporter: for this demo, I used Prometheus</li>
+  
+  </ul>
+
+  <div class="code">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "log"</span>
+<span num="5">    "net/http"</span>
+<span num="6"></span>
+<span num="7">    "go.opencensus.io/exporter/prometheus"</span>
+<span num="8">)</span>
+<span num="9"></span>
+<span num="10">func main() {</span>
+<span num="11">    pe, err := prometheus.NewExporter(prometheus.Options{Namespace: "excavate"})</span>
+<span num="12">    if err != nil {</span>
+<span num="13">        log.Fatalf("Failed to create Prometheus exporter: %v", err)</span>
+<span num="14">    }</span>
+<span num="15">    view.RegisterExporter(pe)</span>
+<span num="16">    go func() {</span>
+<span num="17">        if err := http.ListenAndServe(":9888", pe); err != nil {</span>
+<span num="18">            log.Fatalf("Failed to create Prometheus exporter: %v", err)</span>
+<span num="19">        }</span>
+<span num="20">    }()</span>
+<span num="21">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Available metrics/stats exporters</h3>
+        
+  <ul>
+  
+    <li>Prometheus <a href="https://godoc.org/go.opencensus.io/exporter/prometheus" target="_blank">https://godoc.org/go.opencensus.io/exporter/prometheus</a></li>
+  
+    <li>DataDog <a href="https://godoc.org/github.com/DataDog/opencensus-go-exporter-datadog" target="_blank">https://godoc.org/github.com/DataDog/opencensus-go-exporter-datadog</a></li>
+  
+    <li>Google Stackdriver Monitoring <a href="https://godoc.org/contrib.go.opencensus.io/exporter/stackdriver" target="_blank">https://godoc.org/contrib.go.opencensus.io/exporter/stackdriver</a></li>
+  
+    <li>SignalFX [Coming soon]</li>
+  
+    <li>[Insert your backend here] -- see the next slide for how to create one!</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Creating a custom metrics/stats exporter</h3>
+        
+  <div class="code playground">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "context"</span>
+<span num="5">    "fmt"</span>
+<span num="6">    "time"</span>
+<span num="7"></span>
+<span num="8">    "go.opencensus.io/stats"</span>
+<span num="9">    "go.opencensus.io/stats/view"</span>
+<span num="10">    "go.opencensus.io/tag"</span>
+<span num="11">)</span>
+<span num="12"></span>
+<span num="13">type customPrintExporter struct{}</span>
+<span num="14">func (ce *customPrintExporter) ExportView(vd *view.Data) { fmt.Printf("Send me to your metrics backend:\n%+v\n", vd)}</span>
+<span num="15"></span>
+<span num="16">func main() {</span>
+<span num="17">    view.RegisterExporter(new(customPrintExporter)); view.SetReportingPeriod(time.Millisecond)</span>
+<span num="18">    _ = view.Register(RequestsView)</span>
+<span num="19">    ctx, _ := tag.New(context.Background(), tag.Insert(KeyMethod, "search"))</span>
+<span num="20">    stats.Record(ctx, MRequestsIn.M(23))</span>
+<span num="21">    &lt;-time.After(2 * time.Millisecond)</span>
+<span num="22">}</span>
+<span num="23"></span>
+<span num="24">var KeyMethod, _ = tag.NewKey("method")</span>
+<span num="25">var MRequestsIn, RequestsView = stats.Int64("demo/requests", "The number of requests received", "1"), &amp;view.View{Measure: MRequestsIn, Name: "demo/requests", Description: "Number of requests", Aggregation: view.Count(), TagKeys: []tag.Key{KeyMethod}}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>zPages</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>zPages</h3>
+        
+  <ul>
+  
+    <li>"A collection of HTML pages that display RPC stats and trace data..."</li>
+  
+  </ul>
+
+  
+  <p>
+    <a href="https://godoc.org/go.opencensus.io/zpages" target="_blank">https://godoc.org/go.opencensus.io/zpages</a>
+  </p>
+  
+
+  <ul>
+  
+    <li>Useful for live in-process debugging #introspection</li>
+  
+    <li>Enabled by linking/importing and enabling a handler, sort of what you'd do for "net/http/pprof"?</li>
+  
+  </ul>
+
+  <div class="code">
+
+
+<pre><span num="1">import (</span>
+<span num="2">    "log"</span>
+<span num="3">    "net/http"</span>
+<span num="4"></span>
+<span num="5">    "go.opencensus.io/zpages"</span>
+<span num="6">)</span>
+<span num="7"></span>
+<span num="8">func main() {</span>
+<span num="9">    mux := http.NewServeMux()</span>
+<span num="10">    zpages.Handle(mux, "/debug")</span>
+<span num="11">    log.Fatal(http.ListenAndServe(":7788", mux))</span>
+<span num="12">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>zPages /debug/rpcz</h3>
+        
+<div class="image">
+  <img src="./gosf_files/zpages-rpcz.png" width="950">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>zPages /debug/tracez</h3>
+        
+  
+  <p>
+    If I'd like to "examine mongodb pool.Get latencies and see if we've got traces with latencies &gt; 10 us"?
+  </p>
+  
+
+<div class="image">
+  <img src="./gosf_files/zpages-tracez.png" width="650">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>HTTP and gRPC support</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>HTTP support</h3>
+        
+  <ul>
+  
+    <li><a href="https://godoc.org/go.opencensus.io/plugin/ochttp" target="_blank">https://godoc.org/go.opencensus.io/plugin/ochttp</a></li>
+  
+  </ul>
+
+  <div class="code playground">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "net/http"</span>
+<span num="5"></span>
+<span num="6">    "go.opencensus.io/plugin/ochttp"</span>
+<span num="7">    "go.opencensus.io/stats/view"</span>
+<span num="8">)</span>
+<span num="9"></span>
+<span num="10">func main() {</span>
+<span num="11">    // Start of metrics/stats enabling by registering views</span>
+<span num="12">    _ = view.Register(ochttp.DefaultServerViews...)</span>
+<span num="13">    _ = view.Register(ochttp.DefaultClientViews...)</span>
+<span num="14"></span>
+<span num="15">    // Start of trace propagation configuration for HTTP</span>
+<span num="16">    // For a trace enabled HTTP client/transport</span>
+<span num="17">    _ = &amp;http.Client{Transport: &amp;ochttp.Transport{Base: http.DefaultTransport}}</span>
+<span num="18">    // For a trace enabled HTTP server/handler</span>
+<span num="19">    _ = &amp;ochttp.Handler{Handler: http.DefaultServeMux}</span>
+<span num="20">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+  <ul>
+  
+    <li>See <a href="https://medium.com/@orijtech/hello-world-for-web-servers-in-go-with-opencensus-29955b3f02c6" target="_blank">OpenCensus for HTTP Go developers</a></li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>gRPC support</h3>
+        
+  <ul>
+  
+    <li><a href="https://godoc.org/go.opencensus.io/plugin/ocgrpc" target="_blank">https://godoc.org/go.opencensus.io/plugin/ocgrpc</a></li>
+  
+    <li>gRPC is already instrumented with OpenCensus so tracing and stats support out of the box!</li>
+  
+    <li>Only stats need to be configured by the user</li>
+  
+  </ul>
+
+  <div class="code playground">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "go.opencensus.io/plugin/ocgrpc"</span>
+<span num="5">    "go.opencensus.io/stats/view"</span>
+<span num="6">    "google.golang.org/grpc"</span>
+<span num="7">)</span>
+<span num="8"></span>
+<span num="9">func main() {</span>
+<span num="10">    _ = view.Register(ocgrpc.DefaultServerViews...)</span>
+<span num="11">    _ = view.Register(ocgrpc.DefaultClientViews...)</span>
+<span num="12">    _ = grpc.NewServer(grpc.StatsHandler(new(ocgrpc.ServerHandler)))</span>
+<span num="13">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+  <ul>
+  
+    <li>See <a href="https://medium.com/@orijtech/opencensus-for-go-grpc-developers-7f3ee1ac3d6d" target="_blank">OpenCensus for gRPC Go developers</a></li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Framework and driver integrations/instrumentation work</h3>
+        
+  <ul>
+  
+    <li>Istio</li>
+  
+    <li>Go kit</li>
+  
+    <li>Memcached</li>
+  
+    <li>database/sql</li>
+  
+    <li>MongoDB</li>
+  
+    <li>Caddy webserver</li>
+  
+    <li>Groupcache</li>
+  
+    <li>Google Cloud Spanner</li>
+  
+    <li>Google Cloud Storage</li>
+  
+    <li>Google Bigquery</li>
+  
+    <li>Google Bigtable</li>
+  
+    <li>Redis and many more coming, but also [you can add yours here]</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Demo</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Demo: consumer media search app</h3>
+        
+  <ul>
+  
+    <li>Code at <a href="https://github.com/orijtech/media-search/tree/gosf-demo" target="_blank">https://github.com/orijtech/media-search/tree/gosf-demo</a></li>
+  
+    <li>Architecture below:</li>
+  
+  </ul>
+
+<div class="image">
+  <img src="./gosf_files/full-architecture.jpeg" width="700">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Community</h3>
+        
+  <ul>
+  
+    <li>Github repository <a href="https://github.com/census-instrumentation/opencensus-go" target="_blank">https://github.com/census-instrumentation/opencensus-go</a></li>
+  
+    <li>Twitter <a href="https://twitter.opencensus.io/" target="_blank">https://twitter.opencensus.io</a></li>
+  
+    <li>Gitter <a href="https://gitter.im/census-instrumentation/Lobby" target="_blank">https://gitter.im/census-instrumentation/Lobby</a></li>
+  
+    <li>Website <a href="https://opencensus.io/" target="_blank">https://opencensus.io</a></li>
+  
+    <li>Mailing list <a href="https://groups.google.com/forum/#!forum/census-developers" target="_blank">https://groups.google.com/forum/#!forum/census-developers</a></li>
+  
+    <li>Email <a href="mailto:census-developers@googlegroups.com" target="_blank">census-developers@googlegroups.com</a></li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Questions?</h2>
+      
+      </article>
+  
+  
+
+      <article>
+        <h3>Thank you</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+<p class="link"><a href="mailto:emmanuel@orijtech.com" target="_blank">emmanuel@orijtech.com</a></p><p class="link"><a href="https://orijtech.com/" target="_blank">https://orijtech.com/</a></p><p class="link"><a href="http://twitter.com/odeke_et" target="_blank">@odeke_et</a></p>
+          </div>
+        
+      </article>
+
+    <div class="slide-area" id="prev-slide-area"></div><div class="slide-area" id="next-slide-area"></div></section>
+
+    <div id="help" style="display: none;">
+      Use the left and right arrow keys or click the left and right
+      edges of the page to navigate between slides.<br>
+      (Press 'H' or navigate to hide this message.)
+    </div>
+
+    
+    <script src="./gosf_files/play.js"></script>
+    
+
+    <script>
+      (function() {
+        
+        if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+          var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+          ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+          var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+        }
+      })();
+    </script>
+  
+
+<link rel="stylesheet" type="text/css" href="./gosf_files/css"><link rel="stylesheet" type="text/css" href="./gosf_files/styles.css"></body></html>

@@ -1,0 +1,208 @@
+OpenCensus
+Planet scale observability with OpenCensus
+18 Jul 2018
+Tags: opencensus, observability,distributed-systems
+
+Emmanuel Odeke
+Orijtech, Inc.
+emmanuel@orijtech.com
+https://orijtech.com/
+@odeke_et
+
+* About myself
+- Emmanuel Odeke
+- Working on Go, OpenCensus and the cloud at Orijtech, Inc
+- Avid open source software consumer and producer
+- Always learning!
+
+* What is OpenCensus?
+.image opencensus-logo.png
+
+* OpenCensus
+- OpenCensus is a vendor-agnostic single distribution of libraries for distributed tracing and metrics
+- The work of a collective, talented and vibrant community
+- Entirely open source rewrite of the observability systems that have powered Google’s production systems for the past 10 years:
+  Dapper —> Census —> OpenCensus
+- Collect metrics and traces singly, export to various backends of your choice
+- Exporters/backends include AWS X-Ray, Instana, DataDog, Google Stackdriver Tracing and Monitoring, Prometheus, Zipkin, Jaeger, SignalFX
+- zPages for live introspection
+- For microservices and monoliths alike!
+- It is implemented in Go, Java, Python, C++, PHP, Ruby, Node.js, C#(almost finished)
+
+* Why OpenCensus?
+- Observability means the ability to infer/examine the states of your system from external signals
+- Polyglot microservices are the latest norm and direction of the future
+- Monitoring and logging for monoliths is nice and simple but on breaking out into microservices things get very complex
+- Lessons from Google running their systems at planet scale for the past 10 years
+- Striving for low latency, API compatibility and simplicity
+- Too much churn from vendor lock-in and specialized language support e.g. when integrating libraries, during acquisitions
+- High cognitive load if expecting every single team member to learn how implement tracing and metrics internals
+- Reduce "bus factor" for distributed systems so that teams can specialize and focus on their work
+
+* Planet scale observability?
+- Low latency
+- Live introspection
+- Provides metrics to enable monitoring
+- Helps answers questions what is going on? What went wrong?
+- No need for distributed systems expertise -- important for making teams effective
+- No vendor lock-in
+- Validated ideas from running at planet scale, and this work is now open source
+
+* Go version
+- [[https://godoc.org/go.opencensus.io][]]
+- [[https://github.com/census-instrumentation/opencensus-go][]]
+- HTTP and gRPC support out of the box!
+- Support for exporting traces and metrics to Prometheus, AWS X-Ray, DataDog, Google Stackdriver Tracing and Monitoring, Zipkin, Jaeger
+.image opencensus-go-logo.png _ 400
+
+* Concepts
+- Tracing
+- Metrics
+- zPages
+
+* Tracing
+
+* Tracing
+- A finite tracking of the journey that a request takes across RPC/function boundaries
+- Enabled by a process called "context propagation" which is handled by the underlying transport
+- Consists of "traces"
+- Span: a stride descriptive of the progress of a request
+- A span can have have a parent span
+- Span without a parent is a "root span" while a span with a parent is a "child span"
+- Spans can be annotated with a description and attributes to mark a time event
+- A trace's unit element is a "Span". Uniquely identified by TraceID
+- Thus a "Trace" is a tree of spans, whose events depict a request's flow
+- Traces are usually "sampled" i.e. a proportion of traces is chosen, the rest are discarded
+- Sampling is meant to alleviate processing and storage costs
+
+* Trace integrations
+- Context propagation: think the use of "context.Context"
+- TraceID, SpanID, ParentSpanID encoded and sent over the wire or in the "context.Context"
+- Propagations include B3/Zipkin propagation and CloudTrace propagation
+- HTTP integration [[https://godoc.org/go.opencensus.io/plugin/ochttp][]]
+- gRPC integration [[https://godoc.org/go.opencensus.io/plugin/ocgrpc][]]
+
+* What does a trace look like?
+Given an app
+.image architecture.jpg _ 950
+
+* Tracing code
+.code trace.go
+
+* Trace dissection
+.image trace-visuals.png _ 620
+
+* How did we get that?
+- Enabled an exporter: for this demo, I used Stackdriver Tracing
+.code trace-exporter.go
+
+* Available trace exporters
+- AWS X-Ray [[https://godoc.org/github.com/census-instrumentation/opencensus-go-exporter-aws][]]
+- DataDog [[https://godoc.org/github.com/DataDog/opencensus-go-exporter-datadog][]]
+- Jaeger [[https://godoc.org/go.opencensus.io/exporter/jaeger][]]
+- Zipkin [[https://godoc.org/go.opencensus.io/exporter/zipkin][]]
+- Google Stackdriver Tracing [[https://godoc.org/contrib.go.opencensus.io/exporter/stackdriver][]]
+- [Insert your backend here] -- see the next slide for how to create one!
+
+* Creating a custom trace exporter -- this could be yours!
+.play demo-trace-exporter.go
+
+* Metrics/Stats
+
+* Metrics/Stats
+- Any quantifiable entity on your backend, for example:
+- Number of requests, responses, errors
+- Latency, number of files open and closed, number of certificates etc
+- Aggregatable in the form of counts and distributions
+- Tags: key-value pairs to attach distinguishing information to a metric e.g. ip="10.0.0.4", driver="mysql", service="gmail"
+- In a high traffic environment, there is a very high cognitive load for developers to examine each discrete value
+- Can use aggregations as well as alerts to aid you e.g. if latency > 3s or no requests recorded for 2 minutes
+- Support through the "stats" package [[https://godoc.org/go.opencensus.io/stats][]]
+- The API exports "Measures" stats.Float64 and stats.Int64 to record doubles and int* values respectively
+
+* Metrics/stats
+.code stats.go
+
+* Metrics/stats: Introspection and aggregation of metrics with views
+- Combining a measure, a name, tags and an aggregation(count or distribution) to examine a metric/stat
+.code minimal-view.go
+
+* Metrics dissection
+.image stats-visuals.png _ 980
+
+* How did we get that?
+- Enabled an exporter: for this demo, I used Prometheus
+.code stats-exporter.go
+
+* Available metrics/stats exporters
+- Prometheus [[https://godoc.org/go.opencensus.io/exporter/prometheus][]]
+- DataDog [[https://godoc.org/github.com/DataDog/opencensus-go-exporter-datadog][]]
+- Google Stackdriver Monitoring [[https://godoc.org/contrib.go.opencensus.io/exporter/stackdriver][]]
+- SignalFX [Coming soon]
+- [Insert your backend here] -- see the next slide for how to create one!
+
+* Creating a custom metrics/stats exporter
+.play demo-stats-exporter.go
+
+* zPages
+
+* zPages
+- "A collection of HTML pages that display RPC stats and trace data..."
+
+[[https://godoc.org/go.opencensus.io/zpages][]]
+
+- Useful for live in-process debugging #introspection
+- Enabled by linking/importing and enabling a handler, sort of what you'd do for "net/http/pprof"?
+.code zpages.go
+
+* zPages /debug/rpcz
+.image zpages-rpcz.png _ 950
+
+* zPages /debug/tracez
+If I'd like to "examine mongodb pool.Get latencies and see if we've got traces with latencies > 10 us"?
+.image zpages-tracez.png _ 650
+
+* HTTP and gRPC support
+
+* HTTP support
+- [[https://godoc.org/go.opencensus.io/plugin/ochttp][]]
+.play http.go
+- See [[https://medium.com/@orijtech/hello-world-for-web-servers-in-go-with-opencensus-29955b3f02c6][OpenCensus for HTTP Go developers]]
+
+* gRPC support
+- [[https://godoc.org/go.opencensus.io/plugin/ocgrpc][]]
+- gRPC is already instrumented with OpenCensus so tracing and stats support out of the box!
+- Only stats need to be configured by the user
+.play grpc.go
+- See [[https://medium.com/@orijtech/opencensus-for-go-grpc-developers-7f3ee1ac3d6d][OpenCensus for gRPC Go developers]]
+
+* Framework and driver integrations/instrumentation work
+- Istio
+- Go kit
+- Memcached
+- database/sql
+- MongoDB
+- Caddy webserver
+- Groupcache
+- Google Cloud Spanner
+- Google Cloud Storage
+- Google Bigquery
+- Google Bigtable
+- Redis and many more coming, but also [you can add yours here]
+
+* Demo
+
+* Demo: consumer media search app
+- Code at [[https://github.com/orijtech/media-search/tree/gosf-demo][]]
+- Architecture below:
+.image full-architecture.jpeg _ 700
+
+* Community
+- Github repository [[https://github.com/census-instrumentation/opencensus-go][]]
+- Twitter [[https://twitter.opencensus.io][]]
+- Gitter [[https://gitter.im/census-instrumentation/Lobby][]]
+- Website [[https://opencensus.io][]]
+- Mailing list [[https://groups.google.com/forum/#!forum/census-developers][]]
+- Email [[mailto:census-developers@googlegroups.com][census-developers@googlegroups.com]]
+
+* Questions?

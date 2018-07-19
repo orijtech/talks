@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 10s
+
+  external_labels:
+    monitor: 'excavator' 
+
+scrape_configs:
+  - job_name: 'excavator'
+
+    scrape_interval: 5s
+
+    static_configs:
+      - targets: ['localhost:9888']
