@@ -1,0 +1,247 @@
+Go surgery
+A goroutine and its innards
+12 Oct 2018
+Tags: goroutine, runtime, concurrency
+
+Emmanuel Odeke
+Orijtech, Inc.
+emmanuel@orijtech.com
+https://github.com/odeke-em
+@odeke_et
+
+* About myself
+- Emmanuel Odeke
+- Working on Go, observability with OpenCensus, developer tools and the cloud
+- Avid open source software consumer and producer
+- Always learning!
+.image orijtech_gopher_in_cloud.png _ 400
+
+* Why might this talk be important?
+- Goroutines are arguably Go's appeal to start with
+- Able to effectively test, debug and improve your Go programs
+- Make the runtime and compiler more attractive and demystify some perceived black magic
+- Getting more people interested in working on Go; the project could use everyone's eyes and attention
+- Ability to work on developer tools like debuggers, leak detectors, schedulers
+- Providing the high level picture
+- Commentary on the awesome work of very talented folks who contribute to Go
+
+* Questions that you might have already asked yourself
+- What is a goroutine?
+- How do I start one?
+- How do I exit one?
+- How do I find out which goroutines are running
+
+* Questions that you might not have asked
+- Why goroutines?
+- How does the runtime make a goroutine?
+- How does the compiler interface with the runtime to create a goroutine?
+- How much memory does a goroutine need?
+- How many goroutines can be spawned?
+- How does the runtime manage goroutines?
+- What goroutines exist?
+- How can I enable tracing?
+- Can I find out what goroutines are leaked?
+
+* Terminology
+- P: processor or concretely core:
+    at MOST GOMAXPROCS or by default the number of CPUs available
+
+- M: machine resource, usually threads or scheduler
+never freed but kept in a pool
+
+- G: goroutines -- what Go user programs control and spawn as needed
+never freed but kept in a pool of already created Gs
+
+- M:N scheduling with Ps as managers: to liase between Ms and Gs
+
+* Goroutine
+- A goroutine is a light-weight independent thread of execution that Go users interface with for concurrent programming
+- Go's abstraction to simplify concurrent programming and then parallelism as a by-product
+- Managed by Go's runtime scheduler
+- Gs, Ms and Ps
+- We see goroutines used everywhere with "go <functionCall>" #goWuzHere
+- "Mostly" the elison of serial Go code. With synchronization primitives and some differences though in the case of channels
+
+* Why goroutines?
+- Bare metal multithreading and concurrent programming are VERY hard
+- Unproductive to expect every programmer to re-implement parallelism and concurrency constructs
+- Threads are expensive to create if torn down everytime, managing detached threads is hard
+- Sharing state is expensive and hard to correctly manage in efficient ways #defeatsComputingProgress
+- Processor load balancing is a hard problem
+- Data corruption from lack of concurrency protection in previous constructs
+- Intentional self DOS from unbounded threads e.g. web server gets flooded with 1Million requests and 1Million threads
+
+* Some solutions in the past in other languages and how we got here
+- [[http://man7.org/linux/man-pages/man7/pthreads.7.html][Native multi-threading APIs such as POSIX APIs (pthread)]]
+- [[https://docs.microsoft.com/en-us/windows/desktop/api/processthreadsapi/nf-processthreadsapi-createthread][Windows threading API]]
+- [[http://supertech.csail.mit.edu/cilk/intro.html][Cilk pronounced "silk"]]
+- [Others here that I haven't considered]
+
+* Pthreads
+- POSIX (Portable Operating System Interface) threads
+- APIs to create, join, destroy threads, mutual exclusion, yield the processor to the next thread
+- Not directly supported on Windows but Windows has its own threading APIs distributed in the Windows "kernel.dll"
+- Provide condition variables, broadcast variables, mutexes, helpers to get state of the system
+- Require threading expertise
+- Low level APIs but one of the most powerful and coolest APIs that I enjoy using in C
+
+* Time for a conspiracy theory?
+
+* Cilk
+- Cilk pronounced "silk" [[http://supertech.csail.mit.edu/cilk/intro.html][]]
+- Parallel, multithreaded language for programming Symmetric Multiprocessors (SMPs)
+- Breakthrough PhD thesis by Keith H. Randall at MIT in 1998
+- Added syntatic sugar to plain C programs with 3 keywords: cilk, spawn and sync
+- Simplicity of APIs ensure that C elison of a Cilk program MOSTLY always compiled and was the serial version of the to-be-parallelized program
+- Implemented load balancing and randomized work stealing in the runtime scheduler
+- Now a product from Intel: Cilk++ [[https://www.cilkplus.org][]]
+
+* Exhibit: a concurrent but sometimes parallel Fibonacci generator
+
+* Cilk program
+.code fib_cilk.c
+
+The Cilk compiler would then rewrite those statements, schedule the operations
+in parallel and finally on reaching "sync" it would ensure "x" and "y" returned results.
+
+* Pthread program
+.code fib_pthreads.c
+
+* Pthread program continued
+.code fib_pthreads_2.c
+
+Please note that this is a verbatim translation of the recursive Fibonacci program
+
+* Perhaps looks similar?
+.code fib.go
+
+That's the Go program
+
+* Standing on the shoulder of giants
+- Under the hood, Go's runtime uses the native threading APIs to create the Ms i.e. "pthreads" or "Windows threads" depending on the OS
+- Ideas from Cilk look really similar to what's in Go's concurreny constructs like:
+- "go go_func" vs "cilk c_func"
+- "go func" vs "spawn func": although "go func" never returns a result but can use "chan" or shared memory in Go
+- Synchronization primitives like "chan", "waitgroup" in Go vs "sync"
+- Randomized processor work-stealing and load balancing ideas seem to have had a heavy influence on Go's scheduler which was implemented by Dmitry Vyukov
+- Great work from other Go contributors too #unnamedButAppreciated
+
+* Goroutine states
+
+* States of a goroutine
+A goroutine can be in either of these states:
+- Running: _Grunning, _Gscanrunning
+- Runnable: _Grunnable, _Gscanrunnable
+- Stack being copied: _Gcopystack
+- Waiting: _Gwaiting, _Gscanwaiting -- blocked in the runtime and not executing any user code
+- In the midst of a syscall: _Gsyscall, _Gscansyscall -- not executing user code
+- Idle: _Gidle: just got allocated and is uninitialized
+- Dead: _Gdead -- currently unused; perhaps just exited or it has just been initialized and not executing user code
+
+Reference: [[https://github.com/golang/go/blob/a0d6420d8be2ae7164797051ec74fa2a2df466a1/src/runtime/runtime2.go#L15-L90][golang/src/runtime/runtime2.go states definition]]
+
+* _Gidle state
+- Initial state of a just created goroutine
+- Nothing to run: no work #chillaxing
+
+* _Gsyscall state
+- Invoking a syscall e.g. "sleep", "open"
+.code gsyscall_state.go
+
+* _Gwaiting state
+When performing a long running call such as waiting on a channel operation or
+during garbage collection, when reading memory statistics. Perhaps after a gopark
+call
+
+.code gwaiting_state.go
+
+* _Gcopystack state
+- When a goroutine's stack is being resized e.g. when invoking recursive functions e.g.
+.code recursive.go
+
+* _Grunning state
+- Running user code in Go land
+
+* _Gdead state
+- The status for a goroutine that has finished processing its work and has invoked goexit
+- Trick used by the runtime to hide newly created/initialized goroutines from being printed in stacktraces
+- Can be invoked in user code by invoking [[https://golang.org/pkg/runtime/#Goexit][runtime.Goexit]]
+
+* _Grunnable state
+- The goroutine has completed an operation such as a channel send on an unbuffered channel. This
+goroutine is available to do work now. Transition initiated by goready
+
+* Sample
+.play simple1.go
+
+* How does the runtime make a goroutine?
+- Invokes newproc with size_of_arguments, function_to_invoke, calling_goroutine, program_counter
+- First check if the size of initial stack < _StackMin which is 2K for Go
+- Check if there is an already created goroutine in the global pool of free goroutines, if not, create a new one and publish it with a status of _Gdead
+- Create the stack for this goroutine, perform a copy of the arguments to the local stack of this "function"
+- CORRECTION: "Create a heap for this goroutine" -- non-existent step: memory allocations are performed from the single heap "mheap_" including creating the stack for the goroutine itself
+- Assign the program counter
+
+* What is the interaction between the compiler and the runtime?
+- The runtime creates symbol "newproc" which will be looked up by the compiler whenever it encounters a "go statement"
+- During the compilation phase, SSA (Single Static Assignment) replaces "go statement" with "call newproc arguments"
+- There is a special register, the "g" register which is R10 containing the pointer to the current goroutine
+
+* What are the first goroutines created?
+- Looking inside file: runtime/asm_<ARCH>.s
+    - firstly load argc, argv
+    - Invoke ASM: runtime·rt0_go 
+    - Create the first G: runtime·g0 
+    - Create the first M: runtime·m0 
+    - m->g0  = g0
+    - g-> m  = m0
+- Invoke runtime·osinit
+- Invoke runtime·schedinit
+- Invoke runtime.newproc
+- Start the first non system M: runtime.start
+- Garbage collection forcer
+- "sysmon" -- system monitor: reaper to preempt greedy goroutines, scavenge memory from garbage collection
+
+* How does a goroutine end?
+- With a terminal statement such as panic, return
+- Receives a status of _Gdead. This status is also used when initializing a goroutine, in order to hide it from stacktraces
+- Stopped by signals such as SIGINT, SIGQUIT, SIGTERM etc
+
+* Interesting scenarios
+Function invocation via value and not a pointer
+.play slop.go
+
+* What happened there?
+- Stack-to-Stack copy, size of arguments with size >= 2K on 64 bit machines, ~1.8KB on 32 bit machines
+- In this case a pointer will keep the budget below to: 8 bytes on 64 bit machines, 4 bytes on 32 bit machines
+- Goroutines are started with at least 2K
+- That struct can be fixed to remove slop by rearranging the order of the elements -- struct slop, poor struct packing
+
+* Allure delivery
+
+* GODEBUG
+
+* Debugging state of the scheduler and goroutines
+As per [[https://golang.org/pkg/runtime/#hdr-Environment_Variables][]]
+GODEBUG=schedtrace=<TIME_IN_MS>,scheddetail=1
+
+.code trace.go
+
+* Result
+.image godebug.png 600 _
+
+* Notes
+- debug.Stack -- prints the current goroutine's stack
+- runtime.Stack(dst []byte, stackTraceForAllGoroutines bool) -- returns a formatted stack trace of goroutines
+    if stackTraceForAllGoroutines == false, print only stack trace for calling function
+- Both functions "stop the entire world", freeze all running routines like profiling and garbage collection would
+- Writing Debuggers
+- Useful for finding goroutine leaks #startupIdea #debuggingTools #observability
+
+* Simple leak detector
+.code leak_detector.go
+
+Already Independently implemented in the [[https://github.com/golang/go/blob/d82e51a11973714708ddc7f9f055ae8ea3d509f1/src/net/http/main_test.go#L30-L141][net/http tests]] by Brad Fitzpatrick
+
+* Simple leak detector in action
+.play leak_detector_in_use.go

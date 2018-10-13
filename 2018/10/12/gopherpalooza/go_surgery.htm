@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<!-- saved from url=(0060)http://127.0.0.1:3999/2018/10/12/gopherpalooza/talk.slide#18 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Go surgery</title>
+    
+    <script>
+      var notesEnabled =  false ;
+    </script>
+    <script src="./go_surgery_files/slides.js"></script>
+
+    
+
+    <script>
+      
+      if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+        var _gaq = _gaq || [];
+        _gaq.push(["_setAccount", "UA-11222381-6"]);
+        _gaq.push(["b._setAccount", "UA-49880327-6"]);
+        window.trackPageview = function() {
+          _gaq.push(["_trackPageview", location.pathname+location.hash]);
+          _gaq.push(["b._trackPageview", location.pathname+location.hash]);
+        };
+        window.trackPageview();
+        window.trackEvent = function(category, action, opt_label, opt_value, opt_noninteraction) {
+          _gaq.push(["_trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+          _gaq.push(["b._trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+        };
+      }
+    </script>
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1"><meta name="apple-mobile-web-app-capable" content="yes"></head>
+
+  <body style="display: none" class="loaded">
+
+  
+    <section class="slides layout-widescreen" style="transform: scale(0.3552);">
+  
+
+      <article>
+        <h1>Go surgery</h1>
+        <h3>A goroutine and its innards</h3>
+        <h3>12 October 2018</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+  
+  
+      <article>
+      
+        <h3>About myself</h3>
+        
+  <ul>
+  
+    <li>Emmanuel Odeke</li>
+  
+    <li>Working on Go, observability with OpenCensus, developer tools and the cloud</li>
+  
+    <li>Avid open source software consumer and producer</li>
+  
+    <li>Always learning!</li>
+  
+  </ul>
+
+<div class="image">
+  <img src="./go_surgery_files/orijtech_gopher_in_cloud.png" width="400">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Why might this talk be important?</h3>
+        
+  <ul>
+  
+    <li>Goroutines are arguably Go's appeal to start with</li>
+  
+    <li>Able to effectively test, debug and improve your Go programs</li>
+  
+    <li>Make the runtime and compiler more attractive and demystify some perceived black magic</li>
+  
+    <li>Getting more people interested in working on Go; the project could use everyone's eyes and attention</li>
+  
+    <li>Ability to work on developer tools like debuggers, leak detectors, schedulers</li>
+  
+    <li>Providing the high level picture</li>
+  
+    <li>Commentary on the awesome work of very talented folks who contribute to Go</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Questions that you might have already asked yourself</h3>
+        
+  <ul>
+  
+    <li>What is a goroutine?</li>
+  
+    <li>How do I start one?</li>
+  
+    <li>How do I exit one?</li>
+  
+    <li>How do I find out which goroutines are running</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Questions that you might not have asked</h3>
+        
+  <ul>
+  
+    <li>Why goroutines?</li>
+  
+    <li>How does the runtime make a goroutine?</li>
+  
+    <li>How does the compiler interface with the runtime to create a goroutine?</li>
+  
+    <li>How much memory does a goroutine need?</li>
+  
+    <li>How many goroutines can be spawned?</li>
+  
+    <li>How does the runtime manage goroutines?</li>
+  
+    <li>What goroutines exist?</li>
+  
+    <li>How can I enable tracing?</li>
+  
+    <li>Can I find out what goroutines are leaked?</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Terminology</h3>
+        
+  <ul>
+  
+    <li>P: processor or concretely core:</li>
+  
+  </ul>
+
+  
+  <div class="code"><pre>at MOST GOMAXPROCS or by default the number of CPUs available</pre></div>
+  
+
+  <ul>
+  
+    <li>M: machine resource, usually threads or scheduler</li>
+  
+  </ul>
+
+  
+  <p>
+    never freed but kept in a pool
+  </p>
+  
+
+  <ul>
+  
+    <li>G: goroutines -- what Go user programs control and spawn as needed</li>
+  
+  </ul>
+
+  
+  <p>
+    never freed but kept in a pool of already created Gs
+  </p>
+  
+
+  <ul>
+  
+    <li>M:N scheduling with Ps as managers: to liase between Ms and Gs</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Goroutine</h3>
+        
+  <ul>
+  
+    <li>A goroutine is a light-weight independent thread of execution that Go users interface with for concurrent programming</li>
+  
+    <li>Go's abstraction to simplify concurrent programming and then parallelism as a by-product</li>
+  
+    <li>Managed by Go's runtime scheduler</li>
+  
+    <li>Gs, Ms and Ps</li>
+  
+    <li>We see goroutines used everywhere with "go &lt;functionCall&gt;" #goWuzHere</li>
+  
+    <li>"Mostly" the elison of serial Go code. With synchronization primitives and some differences though in the case of channels</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Why goroutines?</h3>
+        
+  <ul>
+  
+    <li>Bare metal multithreading and concurrent programming are VERY hard</li>
+  
+    <li>Unproductive to expect every programmer to re-implement parallelism and concurrency constructs</li>
+  
+    <li>Threads are expensive to create if torn down everytime, managing detached threads is hard</li>
+  
+    <li>Sharing state is expensive and hard to correctly manage in efficient ways #defeatsComputingProgress</li>
+  
+    <li>Processor load balancing is a hard problem</li>
+  
+    <li>Data corruption from lack of concurrency protection in previous constructs</li>
+  
+    <li>Intentional self DOS from unbounded threads e.g. web server gets flooded with 1Million requests and 1Million threads</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Some solutions in the past in other languages and how we got here</h3>
+        
+  <ul>
+  
+    <li><a href="http://man7.org/linux/man-pages/man7/pthreads.7.html" target="_blank">Native multi-threading APIs such as POSIX APIs (pthread)</a></li>
+  
+    <li><a href="https://docs.microsoft.com/en-us/windows/desktop/api/processthreadsapi/nf-processthreadsapi-createthread" target="_blank">Windows threading API</a></li>
+  
+    <li><a href="http://supertech.csail.mit.edu/cilk/intro.html" target="_blank">Cilk pronounced "silk"</a></li>
+  
+    <li>[Others here that I haven't considered]</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Pthreads</h3>
+        
+  <ul>
+  
+    <li>POSIX (Portable Operating System Interface) threads</li>
+  
+    <li>APIs to create, join, destroy threads, mutual exclusion, yield the processor to the next thread</li>
+  
+    <li>Not directly supported on Windows but Windows has its own threading APIs distributed in the Windows "kernel.dll"</li>
+  
+    <li>Provide condition variables, broadcast variables, mutexes, helpers to get state of the system</li>
+  
+    <li>Require threading expertise</li>
+  
+    <li>Low level APIs but one of the most powerful and coolest APIs that I enjoy using in C</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Time for a conspiracy theory?</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Cilk</h3>
+        
+  <ul>
+  
+    <li>Cilk pronounced "silk" <a href="http://supertech.csail.mit.edu/cilk/intro.html" target="_blank">http://supertech.csail.mit.edu/cilk/intro.html</a></li>
+  
+    <li>Parallel, multithreaded language for programming Symmetric Multiprocessors (SMPs)</li>
+  
+    <li>Breakthrough PhD thesis by Keith H. Randall at MIT in 1998</li>
+  
+    <li>Added syntatic sugar to plain C programs with 3 keywords: cilk, spawn and sync</li>
+  
+    <li>Simplicity of APIs ensure that C elison of a Cilk program MOSTLY always compiled and was the serial version of the to-be-parallelized program</li>
+  
+    <li>Implemented load balancing and randomized work stealing in the runtime scheduler</li>
+  
+    <li>Now a product from Intel: Cilk++ <a href="https://www.cilkplus.org/" target="_blank">https://www.cilkplus.org</a></li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Exhibit: a concurrent but sometimes parallel Fibonacci generator</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Cilk program</h3>
+        
+  <div class="code">
+
+
+<pre><span num="1">int fib(int n) {</span>
+<span num="2">    if (n &lt; 2)</span>
+<span num="3">        return n;</span>
+<span num="4"></span>
+<span num="5">    int x = spawn fib(n-1);</span>
+<span num="6">    int y = spawn fib(n-2);</span>
+<span num="7"></span>
+<span num="8">    sync;</span>
+<span num="9"></span>
+<span num="10">    return x + y;</span>
+<span num="11">}</span>
+</pre>
+
+
+</div>
+
+  
+  <p>
+    The Cilk compiler would then rewrite those statements, schedule the operations
+<br>
+
+    in parallel and finally on reaching "sync" it would ensure "x" and "y" returned results.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Pthread program</h3>
+        
+  <div class="code">
+
+
+<pre><span num="1">#include &lt;stdio.h&gt;</span>
+<span num="2">#include &lt;stdlib.h&gt;</span>
+<span num="3">#include &lt;pthread.h&gt;</span>
+<span num="4"></span>
+<span num="5">void *th_fib(void *arg);</span>
+<span num="6"></span>
+<span num="7">int fib(int n) {</span>
+<span num="8">    if (n &lt; 2)</span>
+<span num="9">        return n;</span>
+<span num="10"></span>
+<span num="11">    pthread_t t1, t2;</span>
+<span num="12">    int n_1 = n-1, n_2 = n-2;</span>
+<span num="13">    pthread_create(&amp;t1, NULL, th_fib, &amp;n_1);</span>
+<span num="14">    pthread_create(&amp;t2, NULL, th_fib, &amp;n_2);</span>
+<span num="15"></span>
+<span num="16">    int *x, *y;</span>
+<span num="17">    pthread_join(t1, (void **)&amp;x);</span>
+<span num="18">    pthread_join(t2, (void **)&amp;y);</span>
+<span num="19"></span>
+<span num="20">    int result = *x + *y;</span>
+<span num="21">    free(x);</span>
+<span num="22">    free(y);</span>
+<span num="23">    return result;</span>
+<span num="24">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="far-past">
+      
+        <h3>Pthread program continued</h3>
+        
+  <div class="code">
+
+
+<pre><span num="1">void *th_fib(void *arg) {</span>
+<span num="2">    int *n = (int *)arg;</span>
+<span num="3">    int *result = malloc(sizeof(int));</span>
+<span num="4">    *result = fib(*n);</span>
+<span num="5">    return (void *)result;</span>
+<span num="6">}</span>
+</pre>
+
+
+</div>
+
+  
+  <p>
+    Please note that this is a verbatim translation of the recursive Fibonacci program
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article class="past">
+      
+        <h3>Perhaps looks similar?</h3>
+        
+  <div class="code">
+
+
+<pre><span num="1">func fib(n int) int {</span>
+<span num="2">    if n &lt; 2 {</span>
+<span num="3">        return n</span>
+<span num="4">    }</span>
+<span num="5"></span>
+<span num="6">    ch := make(chan int)</span>
+<span num="7">    go fibGo(n-1, ch)</span>
+<span num="8">    go fibGo(n-2, ch)</span>
+<span num="9"></span>
+<span num="10">    x := &lt;-ch</span>
+<span num="11">    y := &lt;-ch</span>
+<span num="12">    return x + y</span>
+<span num="13">}</span>
+<span num="14"></span>
+<span num="15">func fibGo(n int, ch chan int) {</span>
+<span num="16">    ch &lt;- fib(n)</span>
+<span num="17">}</span>
+</pre>
+
+
+</div>
+
+  
+  <p>
+    That's the Go program
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article class="current">
+      
+        <h3>Standing on the shoulder of giants</h3>
+        
+  <ul>
+  
+    <li>Under the hood, Go's runtime uses the native threading APIs to create the Ms i.e. "pthreads" or "Windows threads" depending on the OS</li>
+  
+    <li>Ideas from Cilk look really similar to what's in Go's concurreny constructs like:</li>
+  
+    <li>"go go_func" vs "cilk c_func"</li>
+  
+    <li>"go func" vs "spawn func": although "go func" never returns a result but can use "chan" or shared memory in Go</li>
+  
+    <li>Synchronization primitives like "chan", "waitgroup" in Go vs "sync"</li>
+  
+    <li>Randomized processor work-stealing and load balancing ideas seem to have had a heavy influence on Go's scheduler which was implemented by Dmitry Vyukov</li>
+  
+    <li>Great work from other Go contributors too #unnamedButAppreciated</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="next">
+      
+        <h2>Goroutine states</h2>
+      
+      </article>
+  
+  
+  
+      <article class="far-next">
+      
+        <h3>States of a goroutine</h3>
+        
+  
+  <p>
+    A goroutine can be in either of these states:
+<br>
+
+    - Running: _Grunning, _Gscanrunning
+<br>
+
+    - Runnable: _Grunnable, _Gscanrunnable
+<br>
+
+    - Stack being copied: _Gcopystack
+<br>
+
+    - Waiting: _Gwaiting, _Gscanwaiting -- blocked in the runtime and not executing any user code
+<br>
+
+    - In the midst of a syscall: _Gsyscall, _Gscansyscall -- not executing user code
+<br>
+
+    - Idle: _Gidle: just got allocated and is uninitialized
+<br>
+
+    - Dead: _Gdead -- currently unused; perhaps just exited or it has just been initialized and not executing user code
+  </p>
+  
+
+  
+  <p>
+    Reference: <a href="https://github.com/golang/go/blob/a0d6420d8be2ae7164797051ec74fa2a2df466a1/src/runtime/runtime2.go#L15-L90" target="_blank">golang/src/runtime/runtime2.go states definition</a>
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>_Gidle state</h3>
+        
+  <ul>
+  
+    <li>Initial state of a just created goroutine</li>
+  
+    <li>Nothing to run: no work #chillaxing</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>_Gsyscall state</h3>
+        
+  <ul>
+  
+    <li>Invoking a syscall e.g. "sleep", "open"</li>
+  
+  </ul>
+
+  <div class="code">
+
+
+<pre><span num="1">func properFsync(fd int) {</span>
+<span num="2">        syscall.Syscall(syscal.SYS_FCNTL, uintptr(fd), syscall.F_FULLFSYNC, 0)</span>
+<span num="3">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>_Gwaiting state</h3>
+        
+  
+  <p>
+    When performing a long running call such as waiting on a channel operation or
+<br>
+
+    during garbage collection, when reading memory statistics. Perhaps after a gopark
+<br>
+
+    call
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="1">func waitForIt(ch &lt;-chan os.Signal) {</span>
+<span num="2">        sig := &lt;-ch</span>
+<span num="3"></span>
+<span num="4">        // After we've received the signal log it then exit</span>
+<span num="5">        // ...</span>
+<span num="6">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>_Gcopystack state</h3>
+        
+  <ul>
+  
+    <li>When a goroutine's stack is being resized e.g. when invoking recursive functions e.g.</li>
+  
+  </ul>
+
+  <div class="code">
+
+
+<pre><span num="1">func hello() {</span>
+<span num="2">        return hello()</span>
+<span num="3">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>_Grunning state</h3>
+        
+  <ul>
+  
+    <li>Running user code in Go land</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>_Gdead state</h3>
+        
+  <ul>
+  
+    <li>The status for a goroutine that has finished processing its work and has invoked goexit</li>
+  
+    <li>Trick used by the runtime to hide newly created/initialized goroutines from being printed in stacktraces</li>
+  
+    <li>Can be invoked in user code by invoking <a href="https://golang.org/pkg/runtime/#Goexit" target="_blank">runtime.Goexit</a></li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>_Grunnable state</h3>
+        
+  <ul>
+  
+    <li>The goroutine has completed an operation such as a channel send on an unbuffered channel. This</li>
+  
+  </ul>
+
+  
+  <p>
+    goroutine is available to do work now. Transition initiated by goready
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Sample</h3>
+        
+  <div class="code playground">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "sync"</span>
+<span num="5">    "time"</span>
+<span num="6">)</span>
+<span num="7"></span>
+<span num="8">func main() {</span>
+<span num="9">    var wg sync.WaitGroup</span>
+<span num="10">    for i := 0; i &lt; 10; i++ {</span>
+<span num="11">        wg.Add(1)</span>
+<span num="12">        go func(id int, wgg *sync.WaitGroup) {</span>
+<span num="13">            defer wgg.Done()</span>
+<span num="14">            _ = 10</span>
+<span num="15">            &lt;-time.After(100 * time.Millisecond)</span>
+<span num="16">        }(i, &amp;wg)</span>
+<span num="17">    }</span>
+<span num="18">    wg.Wait()</span>
+<span num="19">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>How does the runtime make a goroutine?</h3>
+        
+  <ul>
+  
+    <li>Invokes newproc with size_of_arguments, function_to_invoke, calling_goroutine, program_counter</li>
+  
+    <li>First check if the size of initial stack &lt; _StackMin which is 2K for Go</li>
+  
+    <li>Check if there is an already created goroutine in the global pool of free goroutines, if not, create a new one and publish it with a status of _Gdead</li>
+  
+    <li>Create the stack for this goroutine, perform a copy of the arguments to the local stack of this "function"</li>
+  
+    <li>CORRECTION: "Create a heap for this goroutine" -- non-existent step: memory allocations are performed from the single heap "mheap_" including creating the stack for the goroutine itself</li>
+  
+    <li>Assign the program counter</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>What is the interaction between the compiler and the runtime?</h3>
+        
+  <ul>
+  
+    <li>The runtime creates symbol "newproc" which will be looked up by the compiler whenever it encounters a "go statement"</li>
+  
+    <li>During the compilation phase, SSA (Single Static Assignment) replaces "go statement" with "call newproc arguments"</li>
+  
+    <li>There is a special register, the "g" register which is R10 containing the pointer to the current goroutine</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>What are the first goroutines created?</h3>
+        
+  <ul>
+  
+    <li>Looking inside file: runtime/asm_&lt;ARCH&gt;.s</li>
+  
+  </ul>
+
+  
+  <div class="code"><pre>- firstly load argc, argv
+- Invoke ASM: runtime·rt0_go 
+- Create the first G: runtime·g0 
+- Create the first M: runtime·m0 
+- m-&gt;g0  = g0
+- g-&gt; m  = m0</pre></div>
+  
+
+  <ul>
+  
+    <li>Invoke runtime·osinit</li>
+  
+    <li>Invoke runtime·schedinit</li>
+  
+    <li>Invoke runtime.newproc</li>
+  
+    <li>Start the first non system M: runtime.start</li>
+  
+    <li>Garbage collection forcer</li>
+  
+    <li>"sysmon" -- system monitor: reaper to preempt greedy goroutines, scavenge memory from garbage collection</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>How does a goroutine end?</h3>
+        
+  <ul>
+  
+    <li>With a terminal statement such as panic, return</li>
+  
+    <li>Receives a status of _Gdead. This status is also used when initializing a goroutine, in order to hide it from stacktraces</li>
+  
+    <li>Stopped by signals such as SIGINT, SIGQUIT, SIGTERM etc</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Interesting scenarios</h3>
+        
+  
+  <p>
+    Function invocation via value and not a pointer
+  </p>
+  
+
+  <div class="code playground">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">type deviceRegister struct {</span>
+<span num="4">    i1     int</span>
+<span num="5">    i2     int64</span>
+<span num="6">    i3     int</span>
+<span num="7">    i4     uint64</span>
+<span num="8">    s      string</span>
+<span num="9">    bitmap [256]int</span>
+<span num="10">    i5     int32</span>
+<span num="11">    i6     int</span>
+<span num="12">    f1     [2]float64</span>
+<span num="13">    ch1    [512]byte</span>
+<span num="14">    ch0    [180]byte</span>
+<span num="15">    i7     int64</span>
+<span num="16">    i8     int</span>
+<span num="17">}</span>
+<span num="18"></span>
+<span num="19">func main() {</span>
+<span num="20">    go func(_ deviceRegister) {}(deviceRegister{})</span>
+<span num="21">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>What happened there?</h3>
+        
+  <ul>
+  
+    <li>Stack-to-Stack copy, size of arguments with size &gt;= 2K on 64 bit machines, ~1.8KB on 32 bit machines</li>
+  
+    <li>In this case a pointer will keep the budget below to: 8 bytes on 64 bit machines, 4 bytes on 32 bit machines</li>
+  
+    <li>Goroutines are started with at least 2K</li>
+  
+    <li>That struct can be fixed to remove slop by rearranging the order of the elements -- struct slop, poor struct packing</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Allure delivery</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>GODEBUG</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Debugging state of the scheduler and goroutines</h3>
+        
+  
+  <p>
+    As per <a href="https://golang.org/pkg/runtime/#hdr-Environment_Variables" target="_blank">https://golang.org/pkg/runtime/#hdr-Environment_Variables</a>
+<br>
+
+    GODEBUG=schedtrace=&lt;TIME_IN_MS&gt;,scheddetail=1
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "sync"</span>
+<span num="5">    "time"</span>
+<span num="6">)</span>
+<span num="7"></span>
+<span num="8">func main() {</span>
+<span num="9">    spinSleep := func(wg *sync.WaitGroup) {</span>
+<span num="10">        defer wg.Done()</span>
+<span num="11">        for {</span>
+<span num="12">            &lt;-time.After(500 * time.Millisecond)</span>
+<span num="13">        }</span>
+<span num="14">    }</span>
+<span num="15">    var wg sync.WaitGroup</span>
+<span num="16">    for i := 0; i &lt; 10; i++ {</span>
+<span num="17">        wg.Add(1)</span>
+<span num="18">        go spinSleep(&amp;wg)</span>
+<span num="19">    }</span>
+<span num="20">    wg.Wait()</span>
+<span num="21">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Result</h3>
+        
+<div class="image">
+  <img src="./go_surgery_files/godebug.png" height="600">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Notes</h3>
+        
+  <ul>
+  
+    <li>debug.Stack -- prints the current goroutine's stack</li>
+  
+    <li>runtime.Stack(dst []byte, stackTraceForAllGoroutines bool) -- returns a formatted stack trace of goroutines</li>
+  
+  </ul>
+
+  
+  <div class="code"><pre>if stackTraceForAllGoroutines == false, print only stack trace for calling function</pre></div>
+  
+
+  <ul>
+  
+    <li>Both functions "stop the entire world", freeze all running routines like profiling and garbage collection would</li>
+  
+    <li>Writing Debuggers</li>
+  
+    <li>Useful for finding goroutine leaks #startupIdea #debuggingTools #observability</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Simple leak detector</h3>
+        
+  <div class="code">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "bytes"</span>
+<span num="5">    "fmt"</span>
+<span num="6">    "runtime"</span>
+<span num="7">    "time"</span>
+<span num="8">)</span>
+<span num="9"></span>
+<span num="10">func leakDetector() {</span>
+<span num="11">    buf := make([]byte, 2048)</span>
+<span num="12">    for {</span>
+<span num="13">        n := runtime.Stack(buf, true)</span>
+<span num="14">        splits := bytes.Split(buf[:n], []byte("\n\n"))</span>
+<span num="15">        for i, split := range splits {</span>
+<span num="16">            fmt.Printf("#%d:\n%s\n", i, split)</span>
+<span num="17">        }</span>
+<span num="18">        &lt;-time.After(2 * time.Second)</span>
+<span num="19">        // Reuse the buffer for next refresh</span>
+<span num="20">        copy(buf[len(buf)-n:n], bytes.Repeat([]byte{0x00}, n))</span>
+<span num="21">    }</span>
+<span num="22">}</span>
+</pre>
+
+
+</div>
+
+  
+  <p>
+    Already Independently implemented in the <a href="https://github.com/golang/go/blob/d82e51a11973714708ddc7f9f055ae8ea3d509f1/src/net/http/main_test.go#L30-L141" target="_blank">net/http tests</a> by Brad Fitzpatrick
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Simple leak detector in action</h3>
+        
+  <div class="code playground">
+
+
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "bytes"</span>
+<span num="5">    "fmt"</span>
+<span num="6">    "runtime"</span>
+<span num="7">    "time"</span>
+<span num="8">)</span>
+<span num="9"></span>
+<span num="10">func doWork() {</span>
+<span num="11">    for {</span>
+<span num="12">        &lt;-time.After(1 * time.Second)</span>
+<span num="13">    }</span>
+<span num="14">    _ = 1 + 1</span>
+<span num="15">}</span>
+<span num="16"></span>
+<span num="17">func main() {</span>
+<span num="18">    for i := 0; i &lt; 10; i++ {</span>
+<span num="19">        go doWork()</span>
+<span num="20">    }</span>
+<span num="21">    leakDetector()</span>
+<span num="22">}</span>
+<span num="23"></span>
+<span num="24">func parseStackSections(section []byte) {</span>
+<span num="25">    // Fill in the function to parse goroutine information</span>
+<span num="26">}</span>
+<span num="27"></span>
+<span num="28">func leakDetector() {</span>
+<span num="29">    buf := make([]byte, 2048)</span>
+<span num="30">    for {</span>
+<span num="31">        n := runtime.Stack(buf, true)</span>
+<span num="32">        splits := bytes.Split(buf[:n], []byte("\n\n"))</span>
+<span num="33">        for i, split := range splits {</span>
+<span num="34">            fmt.Printf("#%d:\n%s\n", i, split)</span>
+<span num="35">        }</span>
+<span num="36">        &lt;-time.After(2 * time.Second)</span>
+<span num="37">        // Reuse the buffer for next refresh</span>
+<span num="38">        copy(buf[len(buf)-n:n], bytes.Repeat([]byte{0x00}, n))</span>
+<span num="39">    }</span>
+<span num="40">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+
+      <article>
+        <h3>Thank you</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+<p class="link"><a href="mailto:emmanuel@orijtech.com" target="_blank">emmanuel@orijtech.com</a></p><p class="link"><a href="https://github.com/odeke-em" target="_blank">https://github.com/odeke-em</a></p><p class="link"><a href="http://twitter.com/odeke_et" target="_blank">@odeke_et</a></p>
+          </div>
+        
+      </article>
+
+    <div class="slide-area" id="prev-slide-area"></div><div class="slide-area" id="next-slide-area"></div></section>
+
+    <div id="help" style="display: none;">
+      Use the left and right arrow keys or click the left and right
+      edges of the page to navigate between slides.<br>
+      (Press 'H' or navigate to hide this message.)
+    </div>
+
+    
+    <script src="./go_surgery_files/play.js"></script>
+    
+
+    <script>
+      (function() {
+        
+        if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+          var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+          ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+          var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+        }
+      })();
+    </script>
+  
+
+<link rel="stylesheet" type="text/css" href="./go_surgery_files/css"><link rel="stylesheet" type="text/css" href="./go_surgery_files/styles.css"></body></html>
