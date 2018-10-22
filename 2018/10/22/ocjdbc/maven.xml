@@ -1,0 +1,5 @@
+<dependency>
+    <groupId>io.opencensus.integration</groupId>
+    <artifactId>opencensus-ocjdbc</artifactId>
+    <version>0.2.0</version>
+</dependency>

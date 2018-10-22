@@ -1,0 +1,86 @@
+ocjdbc
+OpenCensus + JDBC
+22 Oct 2018
+Tags: java, jdbc, database, opencensus, observability, distributed-tracing, metrics, drivers
+
+Emmanuel T Odeke
+Orijtech, Inc.
+
+* ocjdbc
+
+* What is it?
+- Type 4 Java driver wrapper for the Java Database Connectivity API
+- instrumented for distributed tracing and metrics with OpenCensus
+- OpenCensus(oc) + JDBC(jdbc) = ocjdbc
+.image ocjdbc.png 400 _
+
+* About OpenCensus
+- OpenCensus is a vendor agnostic single distribution of libraries for distributed tracing and metrics
+- The work of a collective, talented and vibrant community
+- Entirely open sourced rewrite of the observability systems that have powered Google's production systems for the past 10+ years
+- Collect metrics and traces once, export to backends of your choice
+- Exporters/backends include: AWS X-Ray, Google Stackdriver, SignalFx, Zipkin, Jaeger, Datadog, Prometheus, Honeycomb
+- zPages for live introspection
+- For microservices and monoliths alike!
+- Implemented in C#, C++, Go, Java, Python, Node.js, PHP, Ruby
+- Website: [[][https://opencensus.io/]]
+- Github: [[][https://github.com/census-instrumentation]]
+
+* Observability for your JDBC using apps
+
+* Update your pom.xml file
+.code maven.xml
+
+* Source code update
+- Just wrap your connection
+.code import.java
+
+* Now enable exporters to extract your traces and metrics
+- Pick any of the [[https://opencensus.io/guides/exporters/supported-exporters/java/][Java trace and metrics exporters]]
+.code exporters.java
+
+* Results
+
+* Traces
+
+* All traces
+- Navigate to the trace backend's UI
+.image ocjdbc-tracing-all.png 500 _
+
+* Individual trace
+.image ocjdbc-tracing-single-without-sql.png 500 _
+
+* Individual trace with SQL annotation enabled 
+- PII risk so passed as an option
+.code conn_with_annotation.java
+.image ocjdbc-tracing-single-with-sql.png 320 _
+
+* Metrics
+
+* Recorded metrics
+- Latency in milliseconds
+- Number of calls
+- Tags include: "method", "status", "error"
+- Important to identify bottlenecks, slow queries, hotspots in your system
+- Use them to automatically alert your teams and SREs if latency increases beyond a threshold, error rates etc
+
+* All metrics
+.image ocjdbc-metrics-all.png 600 _
+
+* Calls
+.image ocjdbc-metrics-calls.png 580 _
+
+* Latency buckets
+.image ocjdbc-metrics-latency-bucket.png 560 _
+
+* Appreciation
+Great thanks for the collaboration and support from:
+- Yang Song
+- Bogdan Drutu
+- Pritam Shah
+- The entire OpenCensus community and ecosystem
+
+* Resources
+- Please try out the runnable code at [[][https://opencensus.io/guides/integrations/sql/java_sql]]
+- OpenCensus project's website [[][https://opencensus.io]]
+- OpenCensus Gitter room [[][https://gitter.im/census-instrumentation/Lobby]]

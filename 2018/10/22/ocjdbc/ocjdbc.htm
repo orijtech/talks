@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)http://127.0.0.1:3999/talk.slide#21 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>ocjdbc</title>
+    
+    <script>
+      var notesEnabled =  false ;
+    </script>
+    <script src="./ocjdbc_files/slides.js"></script>
+
+    
+
+    <script>
+      
+      if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+        var _gaq = _gaq || [];
+        _gaq.push(["_setAccount", "UA-11222381-6"]);
+        _gaq.push(["b._setAccount", "UA-49880327-6"]);
+        window.trackPageview = function() {
+          _gaq.push(["_trackPageview", location.pathname+location.hash]);
+          _gaq.push(["b._trackPageview", location.pathname+location.hash]);
+        };
+        window.trackPageview();
+        window.trackEvent = function(category, action, opt_label, opt_value, opt_noninteraction) {
+          _gaq.push(["_trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+          _gaq.push(["b._trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+        };
+      }
+    </script>
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1"><meta name="apple-mobile-web-app-capable" content="yes"></head>
+
+  <body style="display: none" class="loaded">
+
+  
+    <section class="slides layout-widescreen">
+  
+
+      <article class="">
+        <h1>ocjdbc</h1>
+        <h3>OpenCensus + JDBC</h3>
+        <h3>22 October 2018</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+  
+  
+      <article class="">
+      
+        <h2>ocjdbc</h2>
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>What is it?</h3>
+        
+  <ul>
+  
+    <li>Type 4 Java driver wrapper for the Java Database Connectivity API</li>
+  
+    <li>instrumented for distributed tracing and metrics with OpenCensus</li>
+  
+    <li>OpenCensus(oc) + JDBC(jdbc) = ocjdbc</li>
+  
+  </ul>
+
+<div class="image">
+  <img src="./ocjdbc_files/ocjdbc.png" height="400">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>About OpenCensus</h3>
+        
+  <ul>
+  
+    <li>OpenCensus is a vendor agnostic single distribution of libraries for distributed tracing and metrics</li>
+  
+    <li>The work of a collective, talented and vibrant community</li>
+  
+    <li>Entirely open sourced rewrite of the observability systems that have powered Google's production systems for the past 10+ years</li>
+  
+    <li>Collect metrics and traces once, export to backends of your choice</li>
+  
+    <li>Exporters/backends include: AWS X-Ray, Google Stackdriver, SignalFx, Zipkin, Jaeger, Datadog, Prometheus, Honeycomb</li>
+  
+    <li>zPages for live introspection</li>
+  
+    <li>For microservices and monoliths alike!</li>
+  
+    <li>Implemented in C#, C++, Go, Java, Python, Node.js, PHP, Ruby</li>
+  
+    <li>Website: <a href="https://opencensus.io/" target="_self">https://opencensus.io/</a></li>
+  
+    <li>Github: <a href="https://github.com/census-instrumentation" target="_self">https://github.com/census-instrumentation</a></li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h2>Observability for your JDBC using apps</h2>
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Update your pom.xml file</h3>
+        
+  <div class="code">
+
+
+<pre><span num="1">&lt;dependency&gt;</span>
+<span num="2">    &lt;groupId&gt;io.opencensus.integration&lt;/groupId&gt;</span>
+<span num="3">    &lt;artifactId&gt;opencensus-ocjdbc&lt;/artifactId&gt;</span>
+<span num="4">    &lt;version&gt;0.2.0&lt;/version&gt;</span>
+<span num="5">&lt;/dependency&gt;</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Source code update</h3>
+        
+  <ul>
+  
+    <li>Just wrap your connection</li>
+  
+  </ul>
+
+  <div class="code">
+
+
+<pre><span num="1">import io.opencensus.integration.ocjdbc.Connection;</span>
+<span num="2">import io.opencensus.integration.ocjdbc.Observability;</span>
+<span num="3"></span>
+<span num="4">public static void main(String ...args) {</span>
+<span num="5">    // After you've enabled your connection, we'll now wrap it</span>
+<span num="6">    java.sql.Connection conn = new Connection(originalConn);</span>
+<span num="7"></span>
+<span num="8">    // Continue using your connection like you did in your normal programs</span>
+<span num="9">}</span>
+<span num="10"></span>
+<span num="11">public static void enableObservability() {</span>
+<span num="12">    // Enable observability with OpenCensus</span>
+<span num="13">    Observability.registerAllViews();</span>
+<span num="14"></span>
+<span num="15">    // Now create the trace and metrics exporters</span>
+<span num="16">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Now enable exporters to extract your traces and metrics</h3>
+        
+  <ul>
+  
+    <li>Pick any of the <a href="https://opencensus.io/guides/exporters/supported-exporters/java/" target="_blank">Java trace and metrics exporters</a></li>
+  
+  </ul>
+
+  <div class="code">
+
+
+<pre><span num="1">import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;</span>
+<span num="2">import io.opencensus.exporter.stats.prometheus.PrometheusStatsCollector;</span>
+<span num="3">import io.prometheus.client.exporter.HTTPServer;</span>
+<span num="4"></span>
+<span num="5">public static void enableObservability() throws Exception {</span>
+<span num="6">    Observability.registerAllViews();</span>
+<span num="7"></span>
+<span num="8">    // The trace exporter, for this demo we'll use Zipkin.</span>
+<span num="9">    JaegerTraceExporter.createAndRegister("http://127.0.0.1:14268/api/traces", "ocjdbc-demo");</span>
+<span num="10"></span>
+<span num="11">    // The metrics exporter.</span>
+<span num="12">    PrometheusStatsCollector.createAndRegister();</span>
+<span num="13"></span>
+<span num="14">    // Run the server as a daeon on address "localhost:8889".</span>
+<span num="15">    HTTPServer server = new HTTPServer("localhost", 8889);</span>
+<span num="16">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h2>Results</h2>
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h2>Traces</h2>
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>All traces</h3>
+        
+  <ul>
+  
+    <li>Navigate to the trace backend's UI</li>
+  
+  </ul>
+
+<div class="image">
+  <img src="./ocjdbc_files/ocjdbc-tracing-all.png" height="500">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Individual trace</h3>
+        
+<div class="image">
+  <img src="./ocjdbc_files/ocjdbc-tracing-single-without-sql.png" height="500">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Individual trace with SQL annotation enabled </h3>
+        
+  <ul>
+  
+    <li>PII risk so passed as an option</li>
+  
+  </ul>
+
+  <div class="code">
+
+
+<pre><span num="1">        java.sql.Connection conn = new Connection(originalConn,</span>
+<span num="2">                                        // And passing this option to allow the spans</span>
+<span num="3">                                        // to be annotated with the SQL queries.</span>
+<span num="4">                                        // Please note that this could be a security concern</span>
+<span num="5">                                        // since it could reveal personally identifying information.</span>
+<span num="6">                                        Observability.OPTION_ANNOTATE_TRACES_WITH_SQL);</span>
+</pre>
+
+
+</div>
+
+<div class="image">
+  <img src="./ocjdbc_files/ocjdbc-tracing-single-with-sql.png" height="320">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h2>Metrics</h2>
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Recorded metrics</h3>
+        
+  <ul>
+  
+    <li>Latency in milliseconds</li>
+  
+    <li>Number of calls</li>
+  
+    <li>Tags include: "method", "status", "error"</li>
+  
+    <li>Important to identify bottlenecks, slow queries, hotspots in your system</li>
+  
+    <li>Use them to automatically alert your teams and SREs if latency increases beyond a threshold, error rates etc</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>All metrics</h3>
+        
+<div class="image">
+  <img src="./ocjdbc_files/ocjdbc-metrics-all.png" height="600">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Calls</h3>
+        
+<div class="image">
+  <img src="./ocjdbc_files/ocjdbc-metrics-calls.png" height="580">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Latency buckets</h3>
+        
+<div class="image">
+  <img src="./ocjdbc_files/ocjdbc-metrics-latency-bucket.png" height="560">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article class="far-past">
+      
+        <h3>Appreciation</h3>
+        
+  
+  <p>
+    Great thanks for the collaboration and support from
+<br>
+
+    - Yang Song
+<br>
+
+    - Bogdan Drutu
+<br>
+
+    - Pritam Shah
+<br>
+
+    - The entire OpenCensus community and ecosystem
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article class="past">
+      
+        <h3>Resources</h3>
+        
+  <ul>
+  
+    <li>Please try out the runnable code at <a href="https://opencensus.io/guides/integrations/sql/java/java_sql" target="_self">https://opencensus.io/guides/integrations/sql/java_sql</a></li>
+  
+    <li>OpenCensus project's website <a href="https://opencensus.io" target="_self">https://opencensus.io</a></li>
+  
+    <li>OpenCensus Gitter room <a href="https://gitter.im/census-instrumentation/Lobby" target="_self">https://gitter.im/census-instrumentation/Lobby</a></li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+
+      <article class="current">
+        <h3>Thank you</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+    <div class="slide-area" id="prev-slide-area"></div><div class="slide-area" id="next-slide-area"></div></section>
+
+    <div id="help" style="display: none;">
+      Use the left and right arrow keys or click the left and right
+      edges of the page to navigate between slides.<br>
+      (Press 'H' or navigate to hide this message.)
+    </div>
+
+    
+    <script src="./ocjdbc_files/play.js"></script>
+    
+
+    <script>
+      (function() {
+        
+        if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+          var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+          ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+          var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+        }
+      })();
+    </script>
+  
+
+<link rel="stylesheet" type="text/css" href="./ocjdbc_files/css"><link rel="stylesheet" type="text/css" href="./ocjdbc_files/styles.css"></body></html>
