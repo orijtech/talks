@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0035)http://127.0.0.1:3999/talk.slide#21 -->
+<!-- saved from url=(0044)http://127.0.0.1:3999/22/ocjdbc/talk.slide#1 -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>ocjdbc</title>
     
@@ -32,10 +32,10 @@
   <body style="display: none" class="loaded">
 
   
-    <section class="slides layout-widescreen">
+    <section class="slides layout-widescreen" style="transform: scale(0.441333);">
   
 
-      <article class="">
+      <article class="current">
         <h1>ocjdbc</h1>
         <h3>OpenCensus + JDBC</h3>
         <h3>22 October 2018</h3>
@@ -60,7 +60,7 @@
 
   
   
-      <article class="">
+      <article class="next">
       
         <h2>ocjdbc</h2>
       
@@ -68,7 +68,7 @@
   
   
   
-      <article class="">
+      <article class="far-next">
       
         <h3>What is it?</h3>
         
@@ -113,9 +113,9 @@
   
     <li>Implemented in C#, C++, Go, Java, Python, Node.js, PHP, Ruby</li>
   
-    <li>Website: <a href="https://opencensus.io/" target="_self">https://opencensus.io/</a></li>
+    <li>Website: <a href="https://opencensus.io/" target="_blank">https://opencensus.io/</a></li>
   
-    <li>Github: <a href="https://github.com/census-instrumentation" target="_self">https://github.com/census-instrumentation</a></li>
+    <li>Github: <a href="https://github.com/census-instrumentation" target="_blank">https://github.com/census-instrumentation</a></li>
   
   </ul>
 
@@ -193,7 +193,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h3>Now enable exporters to extract your traces and metrics</h3>
         
@@ -213,7 +213,7 @@
 <span num="5">public static void enableObservability() throws Exception {</span>
 <span num="6">    Observability.registerAllViews();</span>
 <span num="7"></span>
-<span num="8">    // The trace exporter, for this demo we'll use Zipkin.</span>
+<span num="8">    // The trace exporter, for this demo we'll use Jaeger.</span>
 <span num="9">    JaegerTraceExporter.createAndRegister("http://127.0.0.1:14268/api/traces", "ocjdbc-demo");</span>
 <span num="10"></span>
 <span num="11">    // The metrics exporter.</span>
@@ -232,7 +232,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h2>Results</h2>
       
@@ -240,7 +240,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h2>Traces</h2>
       
@@ -248,7 +248,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h3>All traces</h3>
         
@@ -267,7 +267,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h3>Individual trace</h3>
         
@@ -280,7 +280,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h3>Individual trace with SQL annotation enabled </h3>
         
@@ -313,7 +313,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h2>Metrics</h2>
       
@@ -321,7 +321,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h3>Recorded metrics</h3>
         
@@ -344,7 +344,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h3>All metrics</h3>
         
@@ -357,7 +357,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h3>Calls</h3>
         
@@ -370,7 +370,7 @@
   
   
   
-      <article class="">
+      <article>
       
         <h3>Latency buckets</h3>
         
@@ -383,13 +383,13 @@
   
   
   
-      <article class="far-past">
+      <article>
       
         <h3>Appreciation</h3>
         
   
   <p>
-    Great thanks for the collaboration and support from
+    Great thanks for the collaboration and support from:
 <br>
 
     - Yang Song
@@ -410,17 +410,17 @@
   
   
   
-      <article class="past">
+      <article>
       
         <h3>Resources</h3>
         
   <ul>
   
-    <li>Please try out the runnable code at <a href="https://opencensus.io/guides/integrations/sql/java/java_sql" target="_self">https://opencensus.io/guides/integrations/sql/java_sql</a></li>
+    <li>Please try out the runnable code at <a href="https://opencensus.io/guides/integrations/sql/java_sql" target="_blank">https://opencensus.io/guides/integrations/sql/java_sql</a></li>
   
-    <li>OpenCensus project's website <a href="https://opencensus.io" target="_self">https://opencensus.io</a></li>
+    <li>OpenCensus project's website <a href="https://opencensus.io/" target="_blank">https://opencensus.io</a></li>
   
-    <li>OpenCensus Gitter room <a href="https://gitter.im/census-instrumentation/Lobby" target="_self">https://gitter.im/census-instrumentation/Lobby</a></li>
+    <li>OpenCensus Gitter room <a href="https://gitter.im/census-instrumentation/Lobby" target="_blank">https://gitter.im/census-instrumentation/Lobby</a></li>
   
   </ul>
 
@@ -429,7 +429,7 @@
   
   
 
-      <article class="current">
+      <article>
         <h3>Thank you</h3>
         
           <div class="presenter">

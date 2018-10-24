@@ -5,7 +5,7 @@ import io.prometheus.client.exporter.HTTPServer;
 public static void enableObservability() throws Exception {
     Observability.registerAllViews();
 
-    // The trace exporter, for this demo we'll use Zipkin.
+    // The trace exporter, for this demo we'll use Jaeger.
     JaegerTraceExporter.createAndRegister("http://127.0.0.1:14268/api/traces", "ocjdbc-demo");
 
     // The metrics exporter.

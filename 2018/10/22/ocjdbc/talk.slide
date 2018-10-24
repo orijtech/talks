@@ -23,8 +23,8 @@ Orijtech, Inc.
 - zPages for live introspection
 - For microservices and monoliths alike!
 - Implemented in C#, C++, Go, Java, Python, Node.js, PHP, Ruby
-- Website: [[][https://opencensus.io/]]
-- Github: [[][https://github.com/census-instrumentation]]
+- Website: [[https://opencensus.io/][https://opencensus.io/]]
+- Github: [[https://github.com/census-instrumentation][https://github.com/census-instrumentation]]
 
 * Observability for your JDBC using apps
 
@@ -81,6 +81,6 @@ Great thanks for the collaboration and support from:
 - The entire OpenCensus community and ecosystem
 
 * Resources
-- Please try out the runnable code at [[][https://opencensus.io/guides/integrations/sql/java_sql]]
-- OpenCensus project's website [[][https://opencensus.io]]
-- OpenCensus Gitter room [[][https://gitter.im/census-instrumentation/Lobby]]
+- Please try out the runnable code at [[https://opencensus.io/guides/integrations/sql/java_sql][https://opencensus.io/guides/integrations/sql/java_sql]]
+- OpenCensus project's website [[https://opencensus.io][https://opencensus.io]]
+- OpenCensus Gitter room [[https://gitter.im/census-instrumentation/Lobby][https://gitter.im/census-instrumentation/Lobby]]
