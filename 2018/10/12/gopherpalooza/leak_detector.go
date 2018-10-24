@@ -17,6 +17,5 @@ func leakDetector() {
 		}
 		<-time.After(2 * time.Second)
 		// Reuse the buffer for next refresh
-		copy(buf[len(buf)-n:n], bytes.Repeat([]byte{0x00}, n))
 	}
 }

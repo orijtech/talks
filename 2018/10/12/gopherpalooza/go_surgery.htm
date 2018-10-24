@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0060)http://127.0.0.1:3999/2018/10/12/gopherpalooza/talk.slide#18 -->
+<!-- saved from url=(0034)http://127.0.0.1:3999/talk.slide#1 -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Go surgery</title>
     
@@ -32,10 +32,10 @@
   <body style="display: none" class="loaded">
 
   
-    <section class="slides layout-widescreen" style="transform: scale(0.3552);">
+    <section class="slides layout-widescreen" style="transform: scale(0.441333);">
   
 
-      <article>
+      <article class="current">
         <h1>Go surgery</h1>
         <h3>A goroutine and its innards</h3>
         <h3>12 October 2018</h3>
@@ -60,7 +60,7 @@
 
   
   
-      <article>
+      <article class="next">
       
         <h3>About myself</h3>
         
@@ -85,7 +85,7 @@
   
   
   
-      <article>
+      <article class="far-next">
       
         <h3>Why might this talk be important?</h3>
         
@@ -432,7 +432,7 @@
   
   
   
-      <article class="far-past">
+      <article>
       
         <h3>Pthread program continued</h3>
         
@@ -461,7 +461,7 @@
   
   
   
-      <article class="past">
+      <article>
       
         <h3>Perhaps looks similar?</h3>
         
@@ -501,7 +501,7 @@
   
   
   
-      <article class="current">
+      <article>
       
         <h3>Standing on the shoulder of giants</h3>
         
@@ -528,7 +528,7 @@
   
   
   
-      <article class="next">
+      <article>
       
         <h2>Goroutine states</h2>
       
@@ -536,7 +536,7 @@
   
   
   
-      <article class="far-next">
+      <article>
       
         <h3>States of a goroutine</h3>
         
@@ -1074,9 +1074,8 @@
 <span num="17">        }</span>
 <span num="18">        &lt;-time.After(2 * time.Second)</span>
 <span num="19">        // Reuse the buffer for next refresh</span>
-<span num="20">        copy(buf[len(buf)-n:n], bytes.Repeat([]byte{0x00}, n))</span>
-<span num="21">    }</span>
-<span num="22">}</span>
+<span num="20">    }</span>
+<span num="21">}</span>
 </pre>
 
 
@@ -1137,9 +1136,8 @@
 <span num="35">        }</span>
 <span num="36">        &lt;-time.After(2 * time.Second)</span>
 <span num="37">        // Reuse the buffer for next refresh</span>
-<span num="38">        copy(buf[len(buf)-n:n], bytes.Repeat([]byte{0x00}, n))</span>
-<span num="39">    }</span>
-<span num="40">}</span>
+<span num="38">    }</span>
+<span num="39">}</span>
 </pre>
 
 
