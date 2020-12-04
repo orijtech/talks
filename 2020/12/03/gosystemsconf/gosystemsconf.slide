@@ -317,3 +317,4 @@ go tool pprof http://localhost:3338/debug/pprof/heap?seconds=30
 - [Bryan C Mills 2019: runtime: "program exceeds 50-thread limit"](https://github.com/golang/go/issues/32326/)
 - [OpenCensus](https://opencensus.io/)
 - [OpenTelemetry](https://opentelemetry.io/)
+- [Antifragile: Nassim Taleb 2014](https://www.amazon.com/Antifragile-Things-That-Disorder-Incerto/dp/0812979680/)
