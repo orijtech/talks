@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)http://localhost:3999/gosystemsconf.slide#1 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>FNIHCS</title>
+    
+    <script>
+      var notesEnabled =  false ;
+    </script>
+    <script src="./fnichs_files/slides.js"></script>
+
+    
+
+    <script>
+      
+      if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+        var _gaq = _gaq || [];
+        _gaq.push(["_setAccount", "UA-11222381-6"]);
+        _gaq.push(["b._setAccount", "UA-49880327-6"]);
+        window.trackPageview = function() {
+          _gaq.push(["_trackPageview", location.pathname+location.hash]);
+          _gaq.push(["b._trackPageview", location.pathname+location.hash]);
+        };
+        window.trackPageview();
+        window.trackEvent = function(category, action, opt_label, opt_value, opt_noninteraction) {
+          _gaq.push(["_trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+          _gaq.push(["b._trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+        };
+      }
+    </script>
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1"><meta name="apple-mobile-web-app-capable" content="yes"></head>
+
+  <body style="display: none" class="loaded">
+
+    <section class="slides layout-widescreen" style="transform: scale(0.4952);">
+
+      <article class="current">
+        <h1>FNIHCS</h1>
+        <h3>Finding Needles In Haystacks, and Chaotic Systems!</h3>
+        <h3>3 December 2020</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+  
+  
+      <article class="next">
+      
+        <h3>About myself</h3>
+        <ul>
+<li>Emmanuel T Odeke</li>
+<li>Building <a href="https://orijtech.com/" target="_blank" rel="noopener">Orijtech, Inc</a>.</li>
+<li>Core contributor to Go</li>
+<li>Avid open source software consumer, and producer</li>
+<li>Always learning, and mostly self-taught</li>
+<li>Always do your best!</li>
+</ul>
+
+      
+      <span class="pagenumber">2</span>
+      </article>
+  
+  
+  
+      <article class="far-next">
+      
+        <h3>Simple photo upload microservice</h3>
+        <center><img src="./fnichs_files/simple-photo-upload.jpg" width="550vh"></center>
+      
+      <span class="pagenumber">3</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Uber: microservices graph from July 2020 blog post</h3>
+        <center><img src="./fnichs_files/uber-microservices.png" width="750vh"></center>
+      
+      <span class="pagenumber">4</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Netflix: 2014 Bruce Wong presentation</h3>
+        <center><img src="./fnichs_files/netflix-microservices-2014.jpg" width="980vh"></center>
+      
+      <span class="pagenumber">5</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Netflix: 2016 Josh Evans presentation</h3>
+        <center><img src="./fnichs_files/netflix-microservices-mastering-chaos.png" width="950vh"></center>
+      
+      <span class="pagenumber">6</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Why/What is this talk about?</h3>
+        <ul>
+<li>Demystifying and debugging complex systems without getting overwhelmed</li>
+<li>Intelligently sift through indefinite search spaces of possibilities (reduce entropy)</li>
+<li>Based off real world experiences that have been validated</li>
+<li>Sharing information I've distilled from 10s of thousands of hours building, and debugging systems</li>
+<li>Anti-fragility</li>
+<li>Guide to battling complexity</li>
+<li>War stories</li>
+</ul>
+
+      
+      <span class="pagenumber">7</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Fundamentals</h3>
+        <ul>
+<li>Just like every system is built by cells: the smallest indivisible unit, we start from fundamentals and build upwards</li>
+<li>Technology is meant to return time into our hands and make us productive</li>
+<li>As more features and business cases are developed, complexity compounds</li>
+<li>Standing on the shoulders of giants!</li>
+<li>Risk increases as complexity increases</li>
+<li>When a system fails, cascading failures of other systems follow too:
+<ul>
+<li>Compounded complexity</li>
+<li>Lack of redundancy</li>
+<li>Dependencies</li>
+</ul>
+</li>
+</ul>
+
+      
+      <span class="pagenumber">8</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Anatomy of a system</h3>
+        <ul>
+<li>Business logic and expression
+<ul>
+<li>Programming languages</li>
+<li>Frameworks</li>
+</ul>
+</li>
+<li>Function calls</li>
+<li>InterProcess Communication (IPC)
+<ul>
+<li>Remote Procedure Calls (RPC)</li>
+</ul>
+</li>
+<li>Cardinality: number of connected elements and their relationships</li>
+<li>CPU, RAM, hardware, network limits</li>
+<li>Inherent chaos and fragility due to unknowns
+<ul>
+<li>Cascading failures</li>
+<li>Single points of failure due to lack of redundancy</li>
+</ul>
+</li>
+</ul>
+
+      
+      <span class="pagenumber">9</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>n-process system</h3>
+        <ul>
+<li>In a simplistic model, with 2 process system, if each spoke to the other,
+we'd have:
+<ul>
+<li>A-&gt;B, and B-&gt;A RPCs</li>
+<li>2 * 1 = 2 unique RPC connections</li>
+<li>4 * 3 = 12 unique RPC connections</li>
+<li>100 microservices, talking to each other: 100*99 = 9900 RPCs</li>
+<li>40K microservices: 40K*39,999 = 1.6B RPCs</li>
+</ul>
+</li>
+<li>If we have n services:
+<ul>
+<li>n * (n - 1) ~= n² unique RPC connections</li>
+</ul>
+</li>
+<li>Realistic systems with authentication, database can have 9+ services:
+<ul>
+<li>login, identity, quota, caching, database, metadata, storage, pubsub, recommendations etc</li>
+</ul>
+</li>
+</ul>
+
+      
+      <span class="pagenumber">10</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Scenarios</h3>
+        <ul>
+<li>Niantic summer 2016: Pokemon Go receives 10X anticipated traffic</li>
+<li>Even the most talented engineers hit walls when debugging complex interactions</li>
+<li>High entropy and chaos always reign, and our world is largely still undiscovered</li>
+<li>Even the most respected engineering titans still use call centre like ticket handling and struggle to debug, despite
+unlimited budgets, sophistication, many bodies</li>
+<li>Cascading failures, wild goose chases</li>
+</ul>
+
+      
+      <span class="pagenumber">11</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Case study: Dgraph 2018</h3>
+        <ul>
+<li>Dgraph problems with Raft; failures identified by Jepsen
+<ul>
+<li>Their team had spent months trying to figure out what was wrong, but in vain :-(</li>
+<li>July 2018, Manish Jain attends my talk, <a href="https://orijtech.github.io/talks/2018/07/18/gosf/gosf.htm" target="_blank" rel="noopener">"Planet scale observability with OpenCensus"</a></li>
+<li>Dgraph's team is very highly skilled at building distributed systems, but without observability they hit blind edges</li>
+<li>Exchanged contacts, I shared my slides; had video chats about problems at Dgraph with Raft and Jepsen test failures</li>
+<li>Kept in touch, would answer questions, got them to adopt the OpenCensus Agent that I had written; the agent helped scale their observability</li>
+<li>Manish added OpenCensus, and in hours figured out what was tripping out and had caused many months of headache</li>
+<li>Spent Thanksgiving 2018 with the Dgraph team at their office in San Francisco, adding observability to their code</li>
+</ul>
+</li>
+</ul>
+
+      
+      <span class="pagenumber">12</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Thanksgiving 2018 with Dgraph</h3>
+        <ul>
+<li><a href="https://twitter.com/dgraphlabs/status/1065424167510532096/" target="_blank" rel="noopener">2+ days well spent with new happy friends in code, forged in fire</a></li>
+</ul>
+<center><img src="./fnichs_files/dgraph-thanksgiving.png" width="500vh"></center>
+      
+      <span class="pagenumber">13</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Later happiness and testimonial</h3>
+        <p>Manish's tweet <a href="https://twitter.com/manishrjain/status/1090041366380302336" target="_blank" rel="noopener">https://twitter.com/manishrjain/status/1090041366380302336</a></p>
+<center><img src="./fnichs_files/manish-needle-tweet.png" width="500vh"></center>
+      
+      <span class="pagenumber">14</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Impediments</h3>
+        <ul>
+<li>Barrage of cascading errors happening very fast: world on fire!
+<ul>
+<li>5K QPS * 10 instances * ~300B/span ~&gt; 172.8GiB/day ~&gt; 1.181TiB/week</li>
+<li>How about 40K QPS??</li>
+</ul>
+</li>
+<li>Health of the system at any point <strong>unknown</strong></li>
+<li>Security issues? Network saturation? Resource exhaustion? Seasonalities?</li>
+<li>Debugging requires walking through non-recreatable conditions</li>
+<li>Lost time not executing on your business model nor improving company culture</li>
+<li>Chaos erupts within site reliability engineering (SRE) divisions</li>
+<li>Lost reputations, negative press, pressure on your employees and share holders</li>
+<li>Inability to apply fundamentals further compounds more problems</li>
+<li>Cascading failures, unresponsiveness</li>
+<li><em><strong>Unknowns, and many unknown unknowns</strong></em>!!!</li>
+</ul>
+
+      
+      <span class="pagenumber">15</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Observability</h3>
+        <ul>
+<li>Inferring the states of a system by examining signals.</li>
+<li>In Linear Algebra, a system is represented as a form of equations with variables expressing states
+<ul>
+<li>If there is a solution to the equation, it is linearly solvable</li>
+</ul>
+</li>
+<li>The industry currently uses traces, metrics, logs for signals to examine states</li>
+<li>Take a look at OpenCensus, OpenTelemetry</li>
+<li>Don't just list out and tick off the observability signals, get a great APM provider</li>
+<li>Use instrumented libraries, and integrations</li>
+</ul>
+
+      
+      <span class="pagenumber">16</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Tracing &amp; Metrics</h3>
+        <ul>
+<li>Code that I presented in <a href="https://orijtech.medium.com/groupcache-instrumented-by-opencensus-6a625c3724c/" target="_blank" rel="noopener">GroupCache instrumented by OpenCensus</a></li>
+</ul>
+<center><img src="./fnichs_files/mapbox-search.jpeg" width="820vh"></center>
+      
+      <span class="pagenumber">17</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Tracing aftermath</h3>
+        <ul>
+<li>Result I presented</li>
+</ul>
+<center><img src="./fnichs_files/mapbox-search-traces.png" width="1020vh"></center>
+      
+      <span class="pagenumber">18</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Metrics aftermath</h3>
+        <ul>
+<li>Result I presented</li>
+</ul>
+<center><img src="./fnichs_files/mapbox-search-metrics.png" width="1020vh"></center>
+      
+      <span class="pagenumber">19</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Case study: Google-Cloud-Go 2019</h3>
+        <ul>
+<li>"storage: fix TestIntegration_Objects": <a href="https://github.com/googleapis/google-cloud-go/issues/1482/" target="_blank" rel="noopener">issue #1482</a>
+<ul>
+<li>Running integration tests with Google Cloud Storage would probabilistically fail</li>
+<li>Same code that had been running for ages started to fail</li>
+<li>Can't blame cosmic rays for this</li>
+<li>Hit up a new friend on the storage team, Frank Natividad, walked over to the building at MP3 Sunnyvale after lunch</li>
+<li>Firstly, ran isolated integration tests in a loop, counted how often they failed</li>
+<li>Enabled observability, and that we were transmitting trace-context headers</li>
+<li>Followed trace-context headers, and discovered odd failures that seemed implausible</li>
+<li>Used <strong>GODEBUG=http2debug=2 go run main.go</strong> which revealed that it failed with <code>"contentType":null</code></li>
+<li>Embarassing bug, but we filled it: code freeze and reliability engineering happy</li>
+</ul>
+</li>
+</ul>
+
+      
+      <span class="pagenumber">20</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>High and fast bursts of telemetry/events</h3>
+        <ul>
+<li>Data produced fast and in huge quantities</li>
+<li>Can't be analyzed in a timely fashion nor retrieved easily</li>
+<li>Can't store every trace produced lest blow out of storage budgets
+<ul>
+<li>5K QPS producing say 8 spans, each span about 300B ~&gt; 17.28GiB/day</li>
+</ul>
+</li>
+<li>Sifting through those events when disaster strikes
+<ul>
+<li>Very expensive</li>
+<li>Requires continual monitoring</li>
+<li>Requires robust tools</li>
+<li>Requires lots of quality information, less noise, less goose chases</li>
+</ul>
+</li>
+<li><em><strong>Unknowns, and many unknown unknowns</strong></em>!!! #DonaldRumsfeld</li>
+</ul>
+
+      
+      <span class="pagenumber">21</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Sampling and isolating outliers/anomalies</h3>
+        <ul>
+<li>How can we surface the most important information, report anomalies?</li>
+<li>Most sampling for traces today is done in programs by blind, coin-toss sampling
+<ul>
+<li>Probability, head based sampling is common</li>
+<li>Rate limit based sampling used too</li>
+<li>Tail based sampling tried too</li>
+</ul>
+</li>
+<li>Unfortunately, blind head based and rate limit sampling blindly ignores important events, lose critical information</li>
+<li>If for a short burst of time e.g. when PS5 sales kick off, your e-commerce service gets overwhelmed with traffic,
+coin toss sampling, even rate limited sampled might generate too many events that a very highly skilled but falliable
+and fatigued human has to sift through</li>
+<li>Can we do better?</li>
+</ul>
+
+      
+      <span class="pagenumber">22</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Central Limit Theorem (CLT)</h3>
+        <ul>
+<li>Statistical theorem modeling randomized events over time; falling into a normal distribution</li>
+<li>Proven first &amp; independently by <a href="https://en.wikipedia.org/wiki/Jarl_Waldemar_Lindeberg/" target="_blank" rel="noopener"><em><strong>Jarl W Lindeberg</strong></em></a> in 1922, but unknown to <a href="https://en.wikipedia.org/wiki/Alan_Turing/" target="_blank" rel="noopener"><em><strong>Alan Turing,</strong></em></a> who in 1935, proved it for BSc. thesis &amp; it earned him a Fellowship to King's College, Cambridge</li>
+<li>Alan showed intellectual prowess by proving this theorem</li>
+<li>If you ever got graded on the "Bell Curve", or got ranked, think of the CLT</li>
+<li>CLT's proof unlocked keys to major advancements and assumptions in our modern world</li>
+<li>Other distributions can be approximated by a normal distribution:
+<ul>
+<li>Caveat: might need extra techniques: ask a professional statistician/data-scientist</li>
+</ul>
+</li>
+<li>We stand on the shoulders of giants!</li>
+</ul>
+
+      
+      <span class="pagenumber">23</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>3 sigma rule</h3>
+        <ul>
+<li>By consequence of the CLT, if randomized events behave as a normal distribution:
+<ul>
+<li>Detect anomalies by using confidence intervals and variance: 3-sigma rule</li>
+<li>99.7% of values in the normal distribution aren't anomalous</li>
+<li>Any quantifiable value <em><strong>&gt;= µ+3σ</strong></em> or <em><strong>&lt;= µ-3σ</strong></em> is considered an anomaly</li>
+</ul>
+</li>
+</ul>
+<center><img src="./fnichs_files/normal-distribution-formula.png" width="600vh"></center>
+      
+      <span class="pagenumber">24</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Code</h3>
+        
+  <div class="code">
+<pre><span num="1">                // Return anomalous spans.</span>
+<span num="2">                µPlus3σ := st.mean + 3*st.stddev</span>
+<span num="3">                µMinus3σ := st.mean - 3*st.stddev</span>
+<span num="4">                above3Sigma := make([]*spanDetails, 0, len(sds))</span>
+<span num="5">                below3Sigma := make([]*spanDetails, 0, len(sds))</span>
+<span num="6">                nonInteresting := make([]*spanDetails, 0, len(sds))</span>
+<span num="7">                for _, sd := range sds {</span>
+<span num="8">                        if sd.latencyMs &gt;= µPlus3σ {</span>
+<span num="9">                                above3Sigma = append(above3Sigma, sd)</span>
+<span num="10">                        } else if sd.latencyMs &lt;= µMinus3σ {</span>
+<span num="11">                                below3Sigma = append(below3Sigma, sd)</span>
+<span num="12">                        } else {</span>
+<span num="13">                                nonInteresting = append(nonInteresting, sd)</span>
+<span num="14">                        }</span>
+<span num="15">                }</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">25</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Case study: Google-Cloud-Go 2020</h3>
+        <ul>
+<li>"storage: retry logic for internal errors incompatible with compressed objects": <a href="https://github.com/googleapis/google-cloud-go/issues/1800/" target="_blank" rel="noopener">issue #1800</a>:
+<ul>
+<li>Esoteric request failing on February 25th 2020</li>
+<li>Assigned to me on April 15th 2020: ~2 months after report, and after prior attempts to diagnose it by others</li>
+<li>Carefully read the user's bug report, mental models, went to my white board</li>
+<li>In less than 30 minutes, produced a seed at 4:38PM &amp; 4:56PM using knowledge and finesse about net/http</li>
+<li>Walked back home from my office, had dinner, user responded, filled in the details for the prescription</li>
+<li>Sat down at my home office desk at 7:30PM, read through their reply, At 7:51PM, diagnosed the issue fully</li>
+</ul>
+</li>
+</ul>
+
+      
+      <span class="pagenumber">26</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>storage: retry logic...continued: 2020</h3>
+        <ul>
+<li>"storage: retry logic for internal errors incompatible with compressed objects": <a href="https://github.com/googleapis/google-cloud-go/issues/1800/" target="_blank" rel="noopener">issue #1800</a>:
+<ul>
+<li>Narrowed down the cause without having to make a request to Google Cloud Storage</li>
+<li>The issue was an edge case with the Range header assumptions incorrectly applied for Content-Encoding: gzip</li>
+<li>Decompressive transcoding issue was the problem, triggered by a retry when HTTP/2 stream would error</li>
+<li>Mailed out <a href="https://code-review.googlesource.com/c/gocloud/+/54791/" target="_blank" rel="noopener">CL 54791</a> at 10:22PM; Tyler Bui-Palsulich, Chris Cotter, Cody Oss, Frank Natividad reviewed and approved it</li>
+<li>By April 16th 2020 7:54PM, the fix was merged and my customer's customer was delighted: turned around in less than 36hrs</li>
+</ul>
+</li>
+</ul>
+
+      
+      <span class="pagenumber">27</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Finesse and mastery of your RPC systems and frameworks</h3>
+        <ul>
+<li>Ensure you understand how to navigate and finesse your systems</li>
+<li>Spend some time periodically learning how to use net/http, gRPC, Thrift
+<ul>
+<li>Organize team activities, drills, 20% time activities, rewards for mastery</li>
+</ul>
+</li>
+<li>Learn how to use observability: <a href="https://opencensus.io/" target="_blank" rel="noopener">OpenCensus</a>, <a href="https://opentelemetry.io/" target="_blank" rel="noopener">OpenTelemetry</a></li>
+<li>Carefully collect as much relevant information about failures, then reduce entropy</li>
+<li>Reduce as many unknowns</li>
+<li>I've created for you some guides to get you warmed up and ready to conquer your systems:
+<ul>
+<li><a href="https://orijtech.medium.com/taming-net-http-b946edfda562/" target="_blank" rel="noopener">Taming net/http</a></li>
+<li><a href="https://orijtech.medium.com/opencensus-for-go-grpc-developers-7f3ee1ac3d6d/" target="_blank" rel="noopener">gRPC* and OpenCensus</a></li>
+<li><a href="https://opencensus.io/" target="_blank" rel="noopener">OpenCensus</a></li>
+<li><a href="https://opencensus.io/integrations/" target="_blank" rel="noopener">Integrations of common drivers, providing observability</a></li>
+</ul>
+</li>
+</ul>
+
+      
+      <span class="pagenumber">28</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Case study: Go runtime regression on Darwin: 2019</h3>
+        <ul>
+<li>runtime: threading regression on Go1.11, Go1.12:
+<ul>
+<li>Issue <a href="https://github.com/golang/go/issues/32326" target="_blank" rel="noopener">#32326</a> reported by Michael T Jones, running on an 18 core machine</li>
+<li>Chatted with Ian Lance Taylor and Michael T Jones about potential problems</li>
+<li>Spun up diagnostic to get data in zips with runtime traces as per <a href="https://github.com/golang/go/issues/32326#issuecomment-524997226" target="_blank" rel="noopener">execute, gather and zip code</a>, zip shared offline directly by Michael</li>
+<li>Right after arriving home from a long haul international flight, sat down modelled the system</li>
+<li>Examined runtime traces, read the runtime scheduler code, inferred linear behavior</li>
+<li>Bissected code to a commit that turned out to be a regression from an Assembly instruction that incorrectly blocked every system call and started a new thread on Darwin</li>
+<li>Validated <a href="https://go-review.googlesource.com/c/go/+/197938/" target="_blank" rel="noopener">coincidental fix</a> by Minux Ma; models matched serious regression</li>
+</ul>
+</li>
+</ul>
+
+      
+      <span class="pagenumber">29</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Continuous Profiling</h3>
+        <ul>
+<li>A computer's Central Processing Unit (CPU) runs at mostly specific frequencies e.g. 2.5Ghz, 3.6Ghz</li>
+<li>Ghz (GigaHertz) where a Hertz is the unit of frequency: cycles per second</li>
+<li>2.5Ghz (2.5 billion cycles per second)</li>
+<li>Profiling within programs performs sampling after being sent a SIGPROF signal, and stopped 100 times a second</li>
+<li>100 pauses/sec vs 2.5 billion cycles/sec</li>
+<li>Helps isolate where your code is spending most of its cost, over time: CPU, RAM, Network</li>
+<li>Profiling will show you where most of your code is taxed, and if you fix those hotspots, by Amdahl's Law, you'll end up making your programs faster</li>
+<li>Profiling can reveal surprising information that can't be caught during code reviews</li>
+</ul>
+
+      
+      <span class="pagenumber">30</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>CPU Profiling</h3>
+        <ul>
+<li>Show where your CPU spent a bunch of its time in cycles --&gt; seconds</li>
+</ul>
+
+  <div class="code">
+<pre><span num="1">package main</span>
+<span num="2">import "runtime/pprof"</span>
+<span num="3"></span>
+<span num="4">func periodicallyCPUProfile(ctx context.Context, w io.Writer) error {</span>
+<span num="5">    for {</span>
+<span num="6">        if err := pprof.StartCPUProfile(w); err != nil {</span>
+<span num="7">            panic(err)</span>
+<span num="8">        }</span>
+<span num="9">        select {</span>
+<span num="10">        case &lt;-ctx.Done():</span>
+<span num="11">            return ctx.Err()</span>
+<span num="12">        case &lt;-time.After(profilingPeriod):</span>
+<span num="13">            pprof.StopCPUProfile()</span>
+<span num="14">        }</span>
+<span num="15">        &lt;-time.After(profilingPausePeriod)</span>
+<span num="16">    }</span>
+<span num="17">}</span>
+<span num="18">func main() {</span>
+<span num="19">    go periodicallyCPUProfile(ctx, w)</span>
+<span num="20">    defer cancel()</span>
+<span num="21">    // The rest of the logic goes down below...</span>
+<span num="22">}</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">31</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>CPU Profiling</h3>
+        <ul>
+<li>Alternatively, just use net/http/pprof</li>
+</ul>
+
+  <div class="code">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import _ "net/http/pprof"</span>
+<span num="4"></span>
+<span num="5">func main() {</span>
+<span num="6">    go func() {</span>
+<span num="7">        log.Println(http.ListenAndServe(":3338", nil))</span>
+<span num="8">    }()</span>
+<span num="9">    // Rest of your logic goes here</span>
+<span num="10">}</span>
+</pre>
+</div>
+<p>and then fetch a CPU profile</p>
+<pre><code class="language-shell">go tool pprof http://localhost:3338/debug/pprof/profile?seconds=30
+</code></pre>
+
+      
+      <span class="pagenumber">32</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>CPU Profiling result</h3>
+        <center><img src="./fnichs_files/parsecoin-profile-cpu.png" width="520vh"></center>
+      
+      <span class="pagenumber">33</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Memory profiling</h3>
+        <ul>
+<li>Show where your RAM is hogged up within a program</li>
+</ul>
+
+  <div class="code">
+<pre><span num="1">package main</span>
+<span num="2">import "runtime/pprof"</span>
+<span num="3"></span>
+<span num="4">func periodicallyMemoryProfile(ctx context.Context, w io.Writer) error {</span>
+<span num="5">    for {</span>
+<span num="6">        select {</span>
+<span num="7">        case &lt;-ctx.Done():</span>
+<span num="8">            return ctx.Err()</span>
+<span num="9">        case &lt;-time.After(profilingPeriod):</span>
+<span num="10">            if err := pprof.WriteHeapProfile(w); err != nil {</span>
+<span num="11">                panic(err)</span>
+<span num="12">            }</span>
+<span num="13">        }</span>
+<span num="14">        &lt;-time.After(profilingPausePeriod)</span>
+<span num="15">    }</span>
+<span num="16">}</span>
+<span num="17">func main() {</span>
+<span num="18">    go periodicallyMemoryProfile(ctx, w)</span>
+<span num="19">    defer cancel()</span>
+<span num="20">    // The rest of the logic goes down below...</span>
+<span num="21">}</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">34</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Memory Profiling</h3>
+        <ul>
+<li>Alternatively, just use net/http/pprof</li>
+</ul>
+
+  <div class="code">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import _ "net/http/pprof"</span>
+<span num="4"></span>
+<span num="5">func main() {</span>
+<span num="6">    go func() {</span>
+<span num="7">        log.Println(http.ListenAndServe(":3338", nil))</span>
+<span num="8">    }()</span>
+<span num="9">    // Rest of your logic goes here</span>
+<span num="10">}</span>
+</pre>
+</div>
+<p>and then fetch a CPU profile</p>
+<pre><code class="language-shell">go tool pprof http://localhost:3338/debug/pprof/heap?seconds=30
+</code></pre>
+
+      
+      <span class="pagenumber">35</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Memory Profiling result</h3>
+        <center><img src="./fnichs_files/parsecoin-profile-mem.png" width="400vh"></center>
+      
+      <span class="pagenumber">36</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Advisory</h2>
+      
+      <span class="pagenumber">37</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Toolbox</h3>
+        <ul>
+<li>Proficiency with <a href="https://orijtech.medium.com/taming-net-http-b946edfda562" target="_blank" rel="noopener">net/http package</a>: 30min weekly investment will pay off</li>
+<li><a href="https://golang.org/pkg/net/http/#pkg-overview" target="_blank" rel="noopener">GODEBUG=http2*=N</a>: works for HTTP/2 and gRPC</li>
+<li><a href="https://google.golang.org/grpc/" target="_blank" rel="noopener">gRPC interceptors</a></li>
+<li>Observability: <a href="https://opencensus.io/" target="_blank" rel="noopener">OpenCensus</a> and <a href="https://opentelemetry.io/" target="_blank" rel="noopener">OpenTelemetry</a></li>
+<li>Continuous Profiling: pprof, ███ redacted ███</li>
+<li>Anomaly detection &amp; intelligent sampling: APM providers? ███ redacted ███</li>
+<li>Logs</li>
+<li>Context/trace propagation: W3C, B3 Propagation</li>
+<li>Mock servers: Read through net/http/httptest</li>
+<li>Runtime traces: Read through <a href="https://golang.org/pkg/runtime/trace/" target="_blank" rel="noopener">runtime/trace</a></li>
+<li>Attention to detail in bug reports</li>
+<li>Fuzzing: please take a look at <a href="https://twitter.com/dvyukov/" target="_blank" rel="noopener">Dmitry Vyukov's</a> <a href="https://github.com/dvyukov/go-fuzz/" target="_blank" rel="noopener">go-fuzz</a></li>
+</ul>
+
+      
+      <span class="pagenumber">38</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>References:</h3>
+        <ul>
+<li><a href="https://eng.uber.com/microservice-architecture/" target="_blank" rel="noopener">Uber: Introducing Domain-Oriented Microservice Architecture</a></li>
+<li><a href="https://www.slideshare.net/BruceWong3/the-case-for-chaos" target="_blank" rel="noopener">Netflix: The Case for Chaos</a></li>
+<li><a href="https://www.infoq.com/presentations/netflix-chaos-microservices/" target="_blank" rel="noopener">Netflix: Mastering Choas - A Netflix Guide to Microservices</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Central_limit_theorem" target="_blank" rel="noopener">Central Limit Theorem: Jarl W Lindeberg 1922 || Alan Turing 1935</a></li>
+<li><a href="https://research.google/pubs/pub40801/" target="_blank" rel="noopener">Google: The Tail at Scale 2013: Jeffrey Dean, Luiz André Barroso</a></li>
+<li><a href="http://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf" target="_blank" rel="noopener">Claude Shannon 1948, A Mathematical Theory of Communication</a></li>
+<li><a href="http://www.turingarchive.org/browse.php/c/28/" target="_blank" rel="noopener">Alan Mathison Turing 1935: On the Gaussian Error Function</a></li>
+<li><a href="https://dgraph.io/blog/post/solving-jepsen-with-opencensus/" target="_blank" rel="noopener">Dgraph: Manish Jain 2020, How I solved Jepsen with OpenCensus</a></li>
+<li><a href="https://orijtech.medium.com/taming-net-http-b946edfda562/" target="_blank" rel="noopener">Orijtech 2020: Taming net/http</a></li>
+<li><a href="https://orijtech.medium.com/opencensus-for-go-grpc-developers-7f3ee1ac3d6d/" target="_blank" rel="noopener">Orijtech 2018: OpenCensus for Go gRPC developers</a></li>
+<li><a href="https://golang.org/pkg/net/http/" target="_blank" rel="noopener">Go: net/http</a></li>
+<li><a href="https://google.golang.org/grpc/" target="_blank" rel="noopener">gRPC: grpc-go</a></li>
+</ul>
+
+      
+      <span class="pagenumber">39</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>References</h3>
+        <ul>
+<li><a href="https://sre.google/books/" target="_blank" rel="noopener">Google: Site Reliability Engineering Handbook</a></li>
+<li><a href="https://github.com/dvyukov/go-fuzz" target="_blank" rel="noopener">Dmitry Vyukov: go-fuzz</a></li>
+<li><a href="https://github.com/golang/go/issues/32326/" target="_blank" rel="noopener">Bryan C Mills 2019: runtime: "program exceeds 50-thread limit"</a></li>
+<li><a href="https://opencensus.io/" target="_blank" rel="noopener">OpenCensus</a></li>
+<li><a href="https://opentelemetry.io/" target="_blank" rel="noopener">OpenTelemetry</a></li>
+</ul>
+
+      
+      <span class="pagenumber">40</span>
+      </article>
+  
+  
+
+      <article>
+        <h3>Thank you</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+<p class="link"><a href="mailto:emmanuel@orijtech.com" target="_blank">emmanuel@orijtech.com</a></p><p class="link"><a href="https://orijtech.com/" target="_blank">https://orijtech.com/</a></p>
+  
+  <p>
+    Observability, and infrastructure for high performance systems, and the cloud!
+  </p>
+  
+<p class="link"><a href="http://twitter.com/odeke_et" target="_blank">@odeke_et</a></p>
+          </div>
+        
+      </article>
+
+    <div class="slide-area" id="prev-slide-area"></div><div class="slide-area" id="next-slide-area"></div></section>
+
+    <div id="help" style="display: none;">
+      Use the left and right arrow keys or click the left and right
+      edges of the page to navigate between slides.<br>
+      (Press 'H' or navigate to hide this message.)
+    </div>
+
+    
+    <script src="./fnichs_files/play.js"></script>
+    
+
+    <script>
+      (function() {
+        
+        if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+          var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+          ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+          var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+        }
+      })();
+    </script>
+  
+
+<link rel="stylesheet" type="text/css" href="./fnichs_files/css"><link rel="stylesheet" type="text/css" href="./fnichs_files/styles.css"></body></html>
