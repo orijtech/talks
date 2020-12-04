@@ -1,0 +1,319 @@
+# FNIHCS
+Finding Needles In Haystacks, and Chaotic Systems!
+03 Dec 2020
+Tags: chaos,debugging,distributed-systems,observability
+
+Emmanuel T Odeke
+Orijtech, Inc.
+emmanuel@orijtech.com
+https://orijtech.com/
+Observability, and infrastructure for high performance systems, and the cloud!
+@odeke_et
+
+## About myself
+- Emmanuel T Odeke
+- Building [Orijtech, Inc](https://orijtech.com/).
+- Core contributor to Go
+- Avid open source software consumer, and producer
+- Always learning, and mostly self-taught
+- Always do your best!
+
+## Simple photo upload microservice
+<center><img src="./simple-photo-upload.jpg" width="550vh" /></center>
+
+## Uber: microservices graph from July 2020 blog post
+<center><img src="./uber-microservices.png" width="750vh" /></center>
+
+## Netflix: 2014 Bruce Wong presentation
+<center><img src="./netflix-microservices-2014.jpg" width="980vh" /></center>
+
+## Netflix: 2016 Josh Evans presentation
+<center><img src="./netflix-microservices-mastering-chaos.png" width="950vh" /></center>
+
+## Why/What is this talk about?
+- Demystifying and debugging complex systems without getting overwhelmed
+- Intelligently sift through indefinite search spaces of possibilities (reduce entropy)
+- Based off real world experiences that have been validated
+- Sharing information I've distilled from 10s of thousands of hours building, and debugging systems
+- Anti-fragility
+- Guide to battling complexity
+- War stories
+
+## Fundamentals
+- Just like every system is built by cells: the smallest indivisible unit, we start from fundamentals and build upwards
+- Technology is meant to return time into our hands and make us productive
+- As more features and business cases are developed, complexity compounds
+- Standing on the shoulders of giants!
+- Risk increases as complexity increases
+- When a system fails, cascading failures of other systems follow too:
+    - Compounded complexity
+    - Lack of redundancy
+    - Dependencies
+
+## Anatomy of a system
+- Business logic and expression
+    - Programming languages
+    - Frameworks
+- Function calls
+- InterProcess Communication (IPC)
+    - Remote Procedure Calls (RPC)
+- Cardinality: number of connected elements and their relationships
+- CPU, RAM, hardware, network limits
+- Inherent chaos and fragility due to unknowns
+    - Cascading failures
+    - Single points of failure due to lack of redundancy
+
+## n-process system
+- In a simplistic model, with 2 process system, if each spoke to the other,
+we'd have:
+    - A->B, and B->A RPCs
+    - 2 * 1 = 2 unique RPC connections
+    - 4 * 3 = 12 unique RPC connections
+    - 100 microservices, talking to each other: 100*99 = 9900 RPCs
+    - 40K microservices: 40K*39,999 = 1.6B RPCs
+- If we have n services:
+    - n * (n - 1) ~= n² unique RPC connections
+- Realistic systems with authentication, database can have 9+ services:
+    - login, identity, quota, caching, database, metadata, storage, pubsub, recommendations etc
+
+## Scenarios
+- Niantic summer 2016: Pokemon Go receives 10X anticipated traffic
+- Even the most talented engineers hit walls when debugging complex interactions
+- High entropy and chaos always reign, and our world is largely still undiscovered
+- Even the most respected engineering titans still use call centre like ticket handling and struggle to debug, despite
+unlimited budgets, sophistication, many bodies
+- Cascading failures, wild goose chases
+
+## Case study: Dgraph 2018
+- Dgraph problems with Raft; failures identified by Jepsen
+    - Their team had spent months trying to figure out what was wrong, but in vain :-(
+    - July 2018, Manish Jain attends my talk, ["Planet scale observability with OpenCensus"](https://orijtech.github.io/talks/2018/07/18/gosf/gosf.htm)
+    - Dgraph's team is very highly skilled at building distributed systems, but without observability they hit blind edges
+    - Exchanged contacts, I shared my slides; had video chats about problems at Dgraph with Raft and Jepsen test failures
+    - Kept in touch, would answer questions, got them to adopt the OpenCensus Agent that I had written; the agent helped scale their observability
+    - Manish added OpenCensus, and in hours figured out what was tripping out and had caused many months of headache
+    - Spent Thanksgiving 2018 with the Dgraph team at their office in San Francisco, adding observability to their code
+
+## Thanksgiving 2018 with Dgraph
+- [2+ days well spent with new happy friends in code, forged in fire](https://twitter.com/dgraphlabs/status/1065424167510532096/)
+<center><img src="./dgraph-thanksgiving.png" width="500vh" /></center>
+
+## Later happiness and testimonial
+Manish's tweet [https://twitter.com/manishrjain/status/1090041366380302336](https://twitter.com/manishrjain/status/1090041366380302336)
+<center><img src="./manish-needle-tweet.png" width="500vh" /></center>
+
+## Impediments
+- Barrage of cascading errors happening very fast: world on fire!
+    - 5K QPS * 10 instances * ~300B/span ~> 172.8GiB/day ~> 1.181TiB/week
+    - How about 40K QPS??
+- Health of the system at any point **unknown**
+- Security issues? Network saturation? Resource exhaustion? Seasonalities?
+- Debugging requires walking through non-recreatable conditions
+- Lost time not executing on your business model nor improving company culture
+- Chaos erupts within site reliability engineering (SRE) divisions
+- Lost reputations, negative press, pressure on your employees and share holders
+- Inability to apply fundamentals further compounds more problems
+- Cascading failures, unresponsiveness
+- ***Unknowns, and many unknown unknowns***!!!
+
+## Observability
+- Inferring the states of a system by examining signals.
+- In Linear Algebra, a system is represented as a form of equations with variables expressing states
+    - If there is a solution to the equation, it is linearly solvable
+- The industry currently uses traces, metrics, logs for signals to examine states
+- Take a look at OpenCensus, OpenTelemetry
+- Don't just list out and tick off the observability signals, get a great APM provider
+- Use instrumented libraries, and integrations
+
+## Tracing & Metrics
+- Code that I presented in [GroupCache instrumented by OpenCensus](https://orijtech.medium.com/groupcache-instrumented-by-opencensus-6a625c3724c/)
+<center><img src="./mapbox-search.jpeg" width="820vh" /></center>
+
+## Tracing aftermath
+- Result I presented
+<center><img src="./mapbox-search-traces.png" width="1020vh" /></center>
+
+## Metrics aftermath
+- Result I presented
+<center><img src="./mapbox-search-metrics.png" width="1020vh" /></center>
+
+## Case study: Google-Cloud-Go 2019
+- "storage: fix TestIntegration_Objects": [issue #1482](https://github.com/googleapis/google-cloud-go/issues/1482/)
+    - Running integration tests with Google Cloud Storage would probabilistically fail
+    - Same code that had been running for ages started to fail
+    - Can't blame cosmic rays for this
+    - Hit up a new friend on the storage team, Frank Natividad, walked over to the building at MP3 Sunnyvale after lunch
+    - Firstly, ran isolated integration tests in a loop, counted how often they failed
+    - Enabled observability, and that we were transmitting trace-context headers
+    - Followed trace-context headers, and discovered odd failures that seemed implausible
+    - Used **GODEBUG=http2debug=2 go run main.go** which revealed that it failed with `"contentType":null`
+    - Embarassing bug, but we filled it: code freeze and reliability engineering happy
+
+## High and fast bursts of telemetry/events
+- Data produced fast and in huge quantities
+- Can't be analyzed in a timely fashion nor retrieved easily
+- Can't store every trace produced lest blow out of storage budgets
+    - 5K QPS producing say 8 spans, each span about 300B ~> 17.28GiB/day
+- Sifting through those events when disaster strikes
+    - Very expensive
+    - Requires continual monitoring
+    - Requires robust tools
+    - Requires lots of quality information, less noise, less goose chases
+- ***Unknowns, and many unknown unknowns***!!! #DonaldRumsfeld
+
+## Sampling and isolating outliers/anomalies
+- How can we surface the most important information, report anomalies?
+- Most sampling for traces today is done in programs by blind, coin-toss sampling
+    - Probability, head based sampling is common
+    - Rate limit based sampling used too
+    - Tail based sampling tried too
+- Unfortunately, blind head based and rate limit sampling blindly ignores important events, lose critical information
+- If for a short burst of time e.g. when PS5 sales kick off, your e-commerce service gets overwhelmed with traffic,
+coin toss sampling, even rate limited sampled might generate too many events that a very highly skilled but falliable
+and fatigued human has to sift through
+- Can we do better?
+
+## Central Limit Theorem (CLT)
+- Statistical theorem modeling randomized events over time; falling into a normal distribution
+- Proven first & independently by [***Jarl W Lindeberg***](https://en.wikipedia.org/wiki/Jarl_Waldemar_Lindeberg/) in 1922, but unknown to [***Alan Turing,***](https://en.wikipedia.org/wiki/Alan_Turing/) who in 1935, proved it for BSc. thesis & it earned him a Fellowship to King's College, Cambridge
+- Alan showed intellectual prowess by proving this theorem
+- If you ever got graded on the "Bell Curve", or got ranked, think of the CLT
+- CLT's proof unlocked keys to major advancements and assumptions in our modern world
+- Other distributions can be approximated by a normal distribution:
+    - Caveat: might need extra techniques: ask a professional statistician/data-scientist
+- We stand on the shoulders of giants!
+
+## 3 sigma rule
+- By consequence of the CLT, if randomized events behave as a normal distribution:
+    - Detect anomalies by using confidence intervals and variance: 3-sigma rule
+    - 99.7% of values in the normal distribution aren't anomalous
+    - Any quantifiable value ***>= µ+3σ*** or ***<= µ-3σ*** is considered an anomaly
+<center><img src="./normal-distribution-formula.png" width="600vh" /></center>
+
+## Code
+.code anomalous_spans.go
+
+## Case study: Google-Cloud-Go 2020
+- "storage: retry logic for internal errors incompatible with compressed objects": [issue #1800](https://github.com/googleapis/google-cloud-go/issues/1800/):
+    - Esoteric request failing on February 25th 2020
+    - Assigned to me on April 15th 2020: ~2 months after report, and after prior attempts to diagnose it by others
+    - Carefully read the user's bug report, mental models, went to my white board
+    - In less than 30 minutes, produced a seed at 4:38PM & 4:56PM using knowledge and finesse about net/http
+    - Walked back home from my office, had dinner, user responded, filled in the details for the prescription
+    - Sat down at my home office desk at 7:30PM, read through their reply, At 7:51PM, diagnosed the issue fully
+
+## storage: retry logic...continued: 2020
+- "storage: retry logic for internal errors incompatible with compressed objects": [issue #1800](https://github.com/googleapis/google-cloud-go/issues/1800/):
+    - Narrowed down the cause without having to make a request to Google Cloud Storage
+    - The issue was an edge case with the Range header assumptions incorrectly applied for Content-Encoding: gzip
+    - Decompressive transcoding issue was the problem, triggered by a retry when HTTP/2 stream would error
+    - Mailed out [CL 54791](https://code-review.googlesource.com/c/gocloud/+/54791/) at 10:22PM; Tyler Bui-Palsulich, Chris Cotter, Cody Oss, Frank Natividad reviewed and approved it
+    - By April 16th 2020 7:54PM, the fix was merged and my customer's customer was delighted: turned around in less than 36hrs
+
+## Finesse and mastery of your RPC systems and frameworks
+- Ensure you understand how to navigate and finesse your systems
+- Spend some time periodically learning how to use net/http, gRPC, Thrift
+    - Organize team activities, drills, 20% time activities, rewards for mastery
+- Learn how to use observability: [OpenCensus](https://opencensus.io/), [OpenTelemetry](https://opentelemetry.io/)
+- Carefully collect as much relevant information about failures, then reduce entropy
+- Reduce as many unknowns
+- I've created for you some guides to get you warmed up and ready to conquer your systems:
+    - [Taming net/http](https://orijtech.medium.com/taming-net-http-b946edfda562/)
+    - [gRPC* and OpenCensus](https://orijtech.medium.com/opencensus-for-go-grpc-developers-7f3ee1ac3d6d/)
+    - [OpenCensus](https://opencensus.io/)
+    - [Integrations of common drivers, providing observability](https://opencensus.io/integrations/)
+
+## Case study: Go runtime regression on Darwin: 2019
+- runtime: threading regression on Go1.11, Go1.12:
+    - Issue [#32326](https://github.com/golang/go/issues/32326) reported by Michael T Jones, running on an 18 core machine
+    - Chatted with Ian Lance Taylor and Michael T Jones about potential problems
+    - Spun up diagnostic to get data in zips with runtime traces as per [execute, gather and zip code](https://github.com/golang/go/issues/32326#issuecomment-524997226), zip shared offline directly by Michael
+    - Right after arriving home from a long haul international flight, sat down modelled the system
+    - Examined runtime traces, read the runtime scheduler code, inferred linear behavior
+    - Bissected code to a commit that turned out to be a regression from an Assembly instruction that incorrectly blocked every system call and started a new thread on Darwin
+    - Validated [coincidental fix](https://go-review.googlesource.com/c/go/+/197938/) by Minux Ma; models matched serious regression
+
+## Continuous Profiling
+- A computer's Central Processing Unit (CPU) runs at mostly specific frequencies e.g. 2.5Ghz, 3.6Ghz
+- Ghz (GigaHertz) where a Hertz is the unit of frequency: cycles per second
+- 2.5Ghz (2.5 billion cycles per second)
+- Profiling within programs performs sampling after being sent a SIGPROF signal, and stopped 100 times a second
+- 100 pauses/sec vs 2.5 billion cycles/sec
+- Helps isolate where your code is spending most of its cost, over time: CPU, RAM, Network
+- Profiling will show you where most of your code is taxed, and if you fix those hotspots, by Amdahl's Law, you'll end up making your programs faster
+- Profiling can reveal surprising information that can't be caught during code reviews
+
+## CPU Profiling
+- Show where your CPU spent a bunch of its time in cycles --> seconds
+
+.code cpu_profile.go
+
+## CPU Profiling
+- Alternatively, just use net/http/pprof
+
+.code net_pprof.go
+
+and then fetch a CPU profile
+
+```shell
+go tool pprof http://localhost:3338/debug/pprof/profile?seconds=30
+```
+
+## CPU Profiling result
+<center><img src="./parsecoin-profile-cpu.png" width="520vh" /></center>
+
+## Memory profiling
+- Show where your RAM is hogged up within a program
+
+.code mem_profile.go
+
+## Memory Profiling
+- Alternatively, just use net/http/pprof
+
+.code net_pprof.go
+
+and then fetch a CPU profile
+
+```shell
+go tool pprof http://localhost:3338/debug/pprof/heap?seconds=30
+```
+
+## Memory Profiling result
+<center><img src="./parsecoin-profile-mem.png" width="400vh" /></center>
+
+## Advisory
+
+## Toolbox
+- Proficiency with [net/http package](https://orijtech.medium.com/taming-net-http-b946edfda562): 30min weekly investment will pay off
+- [GODEBUG=http2*=N](https://golang.org/pkg/net/http/#pkg-overview): works for HTTP/2 and gRPC
+- [gRPC interceptors](https://google.golang.org/grpc/)
+- Observability: [OpenCensus](https://opencensus.io/) and [OpenTelemetry](https://opentelemetry.io/)
+- Continuous Profiling: pprof, ███ redacted ███
+- Anomaly detection & intelligent sampling: APM providers? ███ redacted ███
+- Logs
+- Context/trace propagation: W3C, B3 Propagation
+- Mock servers: Read through net/http/httptest
+- Runtime traces: Read through [runtime/trace](https://golang.org/pkg/runtime/trace/)
+- Attention to detail in bug reports
+- Fuzzing: please take a look at [Dmitry Vyukov's](https://twitter.com/dvyukov/) [go-fuzz](https://github.com/dvyukov/go-fuzz/)
+
+## References:
+- [Uber: Introducing Domain-Oriented Microservice Architecture](https://eng.uber.com/microservice-architecture/)
+- [Netflix: The Case for Chaos](https://www.slideshare.net/BruceWong3/the-case-for-chaos)
+- [Netflix: Mastering Choas - A Netflix Guide to Microservices](https://www.infoq.com/presentations/netflix-chaos-microservices/)
+- [Central Limit Theorem: Jarl W Lindeberg 1922 || Alan Turing 1935](https://en.wikipedia.org/wiki/Central_limit_theorem)
+- [Google: The Tail at Scale 2013: Jeffrey Dean, Luiz André Barroso](https://research.google/pubs/pub40801/)
+- [Claude Shannon 1948, A Mathematical Theory of Communication](http://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf)
+- [Alan Mathison Turing 1935: On the Gaussian Error Function](http://www.turingarchive.org/browse.php/c/28/)
+- [Dgraph: Manish Jain 2020, How I solved Jepsen with OpenCensus](https://dgraph.io/blog/post/solving-jepsen-with-opencensus/)
+- [Orijtech 2020: Taming net/http](https://orijtech.medium.com/taming-net-http-b946edfda562/)
+- [Orijtech 2018: OpenCensus for Go gRPC developers](https://orijtech.medium.com/opencensus-for-go-grpc-developers-7f3ee1ac3d6d/)
+- [Go: net/http](https://golang.org/pkg/net/http/)
+- [gRPC: grpc-go](https://google.golang.org/grpc/)
+
+## References
+- [Google: Site Reliability Engineering Handbook](https://sre.google/books/)
+- [Dmitry Vyukov: go-fuzz](https://github.com/dvyukov/go-fuzz)
+- [Bryan C Mills 2019: runtime: "program exceeds 50-thread limit"](https://github.com/golang/go/issues/32326/)
+- [OpenCensus](https://opencensus.io/)
+- [OpenTelemetry](https://opentelemetry.io/)
