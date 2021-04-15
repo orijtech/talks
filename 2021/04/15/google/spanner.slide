@@ -1,0 +1,340 @@
+# Cloud Spanner Safari
+A journey from the outside, into Cloud Spanner's underbelly
+15 Apr 2021
+Tags: databases,distributed-systems,debugging
+
+Emmanuel T Odeke
+Orijtech, Inc.
+emmanuel@orijtech.com
+https://orijtech.com/
+Observability, and infrastructure for high performance systems, and the cloud!
+@odeke_et
+
+## Journey from outside, to the inside
+<center><img src="./safari-cheetah.png" width="450vh" /></center>
+
+## About myself
+- Emmanuel T Odeke
+- Building [Orijtech, Inc](https://orijtech.com/)
+- Friend of Google: Contributor, Supplier, Google Cloud Partner for many years
+- Help build many systems, projects, and work with a bunch of you
+- Avid open source producer and consumer
+- Designed and built Cloud Spanner for Django, Cloud Spanner for Ruby-on-Rails/ActiveRecord
+- Led [OpenCensus](https://opencensus.io/) observability in many aspects from zero to successful merger
+- Core contributor to the [Go programming language](https://golang.org/)
+- Always learning, and enjoy solving problems!
+
+## What is this talk about?
+- Dealt with Cloud Spanner's underbelly from the outside world
+- Hinderances towards building with, and adopting Cloud Spanner
+- Suggestions on how to grow
+- Reality check
+- Advisory and ideas for how to act upon identified needs
+
+## Narrative
+- Cloud Spanner is Google's distributed relational, cloud native database, indefinitely scalable, highly performant, managed, battle tested
+- Highest availability defying normal expectations of the CAP theorem
+- Majority of the world uses legacy systems, mostly maintains code
+- To grow Cloud Spanner, we need more and newer businesses to switch over
+- To enable adoption, seemlessly integrate with existing code, reduce learning curve
+- MARR (Minimum Acceptable Rate of Return) of using new databases must be much higher and sustainable, than just using older stable systems
+- Switching over to any new database requires experience, determinism, features
+- Knowledge gaps
+
+## Market share
+
+## Status quo
+- Per [DB-Engines Ranking for popular Relational DBMS](https://db-engines.com/en/ranking/relational+dbms), Cloud Spanner is 51 out of 142 in rank, as of April 2021
+![](./db-ranking-rdbms.png)
+
+## Status quo
+- At the top, we have OracleDB(42yr), MySQL(26yr), Microsoft SQL Server(32yr), PostgreSQL(25yr), IBM Db2(38yr), SQLite(30yr)
+- Cloud Spanner was released February 2017
+- Doing great for a very young database
+- To get to the top, plumb with both new and legacy systems, frameworks
+- Make switch-over trivial
+- Convenience, so that engineers can trivially convince their engineering management and finance departments to move to Cloud Spanner
+- Cloud Spanner can definitely make it to Number 1!
+
+## Status quo
+- Incumbents have dominated
+- Scaling databases and reliability are pretty much rocket science
+- Information and skills in this industry are very scarce
+- [Sugu Sougoumarane](https://www.linkedin.com/in/sugu-sougoumarane-b9bb25/), CTO/co-founder of [PlanetScale Data](https://www.planetscale.com/) scaled YouTube's MySQL; was hired by Elon Musk for X.com, Paypal
+- Can't expect every company to afford ninja dBAs and SRE teams
+- Most applications are built using frameworks, ORMs:  Django, Ruby-on-Rails, Spring
+- Most code is maintained, more than newly written; hard to justify rewriting legacy code that works
+- Dialect expertise means job pool is very limited in the already limited engineering talent pool
+- Betting your business on a technology requires evidence of extraordinary results, incumbent mass adoption, buzz, leadership, copying from successes
+
+## Constraints for most companies
+- Proof of concepts evolve into fully fledged products -- engineering decisions and stack have to be good from the start
+- Technical expertise to run and scale databases
+- Monetary constraints
+- SRE problems
+- Lack of expertise
+- Every penny counts
+- Least time, cost to setup/use -> creates more trust and easy decision making
+- Simplicity is much better
+
+## Cloud Spanner as a business
+
+## Cloud Spanner strengths
+- Engineering prowess, brand, and powerful backing of Google
+- Amazing leadership and teams: genuinely focused on solving customer problems
+- Cloud Spanner removes the need to become a dBA, or a scaling expert!
+- Guts cost of running own databases: SRE nightmares, knowledge blackholes, server cost, observability, availability problems
+- Scalability, libraries, integrations
+- Very nice APIs to insert or update, named variables in statements, running transactions
+- Very nice UI that's multi-purpose
+- Backing of a top 3 cloud, and eco-system of other cloud products
+- Cloud Spanner emulator introduced in mid 2020, allows for trials
+- Ability to run on 1 node reduces cost massively, attractive to companies of all sizes
+
+## Increasing market share
+- Google is successful for wholely owning information retrieval, making it trivial for every single business to find information and advertise their businesses
+- Tackle the status quo and go into markets for which re-writing code afresh is impossible
+- Analysis of the market: we listed out top ORMs by popularity
+- Target: make Cloud Spanner trivially usable on popular ORMs
+- Prior attempts at integrating with Rails and Django had failed as far as I know
+
+## Django
+- Python and world's most popular web frameworks for the past ~16 years since July 15th, 2005
+- Django is [used by Instagram/Facebook ($727.32B), Tesla($626.98B), Spotify($57.11B), Dropbox($9.30B), Eventbrite($2.07B), YouTube($1.36T), Disqus($1.3B 2017), Washington Post($250M 2013), Robinhood($40B 2021), Pinterest($46.76B), DoorDash($47.09B), Postmates($2.65B 2020), GoDaddy($13.37B)](https://stackshare.io/django)
+- Python is #3 as of [February 2021 on the TIOBE Index](https://www.tiobe.com/tiobe-index/python/)
+
+## ActiveRecord (Ruby-on-Rails)
+- Ruby's most popular web framework, and one of the world's most influential web frameworks, MVC, since August 2004
+- Rails, ActiveRecord are [used by: Shopify, Airbnb, Twitter, Twitch, Instacart, Github, Accenture, Gitlab, Heroku, Intuit, Sendgrid/Twilio, Coinbase](https://stackshare.io/rails)
+- Ruby is #14 as of [February 2021 on the TIOBE Index](https://www.tiobe.com/tiobe-index/ruby/)
+
+## Moonshots
+
+## Moonshots
+- Audacious goals
+- Meet businesses at home, bring Cloud Spanner to them
+- Exisiting and future customers who'll feed into Google Cloud Platform
+- Engineering leadership: Pritam, Shanika, Vikram, and others reached out, we collaborated
+<center><img src="./get-on-journey.png" width="400vh" /></center>
+
+## Journey
+
+## Gestalt switch
+<center><img src="./gestalt-switch.jpg" width="950vh" /></center>
+
+## Lack of AUTO*INCREMENT
+- Most of the world for the past 30 years has been using SQL databases that support AUTO*INCREMENT
+- Sure, it is to avoid hot spotting in Cloud Spanner but patching to support for UUID generation was a whole hassle
+- Patched support means customers have to re-write their sorting, breaks results: Hyrum's Law
+- Cloud Spanner could have a mapping between assigned IDs and the actual UUIDs used as PRIMARY KEY
+- Provide perhaps a UUID function that's used with DDL
+
+## Columns starting with "_" are not supported
+- Makes it impossible for ORMs and frameworks to have special ordering/sorting routines nor orderings
+- Django has `_order` but unfortunately can't be supported with Cloud Spanner
+
+## Lack of NUMERIC data type then
+- The NUMERIC data type was added in late September 2020 (7 months ago)
+- The remedy for this was just to store big nums as strings to avoid precision loss
+
+## ORDER BY RANDOM unsupported
+- [Legacy apps have to rewrite their applications and remove random querying](https://github.com/googleapis/python-spanner-django/pull/432)
+- This can be substituted by using [TABLESAMPLE](https://cloud.google.com/spanner/docs/query-syntax#tablesample_operator) combined with LIMIT N e.g. N=1, but TABLESAMPLE can return 0 rows if `percent` or `sample_size` don't match the population or if the ratios result in 0, so unreliable
+
+## Cannot type check on fields
+- By the time many queries are being made, the original schema is unknown, yet there is no conditional to check or cast values
+- Computations that yield FLOAT64 values cannot be assigned to INT64 columns, which limits querying and would have to redesign Cloud Spanner
+- This is still an open problem with django-spanner e.g. [after integer division, which produces a float results, but that value can't be assigned to an integer column](https://github.com/googleapis/python-spanner-django/issues/331)
+
+## Hyper improvement with query optimizer
+- Given this DDL
+
+```sql
+CREATE TABLE Span (
+    id STRING(16) NOT NULL,
+    trace_id STRING(32) NOT NULL,
+    parent_id STRING(16),
+    source_node STRING(32) NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP,
+    saved_at TIMESTAMP OPTIONS (allow_commit_timestamp=true),
+    name STRING(MAX) NOT NULL,
+    kind INT64,
+    status_code INT64,
+    status_message STRING(MAX),
+    user_agent STRING(MAX),
+    CONSTRAINT FK_SpanNode FOREIGN KEY (source_node) REFERENCES Node(id),
+) PRIMARY KEY (id, trace_id);
+CREATE INDEX Span_EndTime ON Span (end_time)
+CREATE INDEX Span_StartTime ON Span (start_time)
+```
+
+## Query optimizer improvement
+```sql
+SELECT DISTINCT(name) FROM Span WHERE start_time >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 120 SECOND)
+```
+
+<center><img src="./full-table-scan.png" width="950vh" /></center>
+
+## Hacky remedy
+- Using FORCE_INDEX
+- Avoid the full table scan that takes 16+ seconds
+- Firstly infer that the output table names exist in the full table, else return an error
+- Search through the target index, retrieve the respective PRIMARY KEY values and then search only by the trimmed value set using ID
+
+## Better remedy: more composite index: 16+sec -> 1.89sec
+```sql
+CREATE INDEX Span_SourceNode_Name_StartTime_EndTime_TraceID 
+ON Span (
+	source_node, name, start_time, end_time, trace_id
+)
+```
+<center><img src="./query-result-expectation.png" width="700vh" /></center>
+
+## Transactions can't mix DQL with DML
+- Cannot mix Data Query Language (DQL) statements with Data Manipulation Language (DML) statements
+- `SELECT * From Org1; DROP Table Org2`
+- Made migrations insanely slow, can't be parallelized because of strict ordering
+- Faux transaction whereby only abort DML iff prior DQL failed
+- While the DQL is happening, can synchronize watches and then perform an exfiltration of data or modify tables concurrently and rename them, so that subsequent DML won't run, then rename it
+- Ooh, INFORMATION_SCHEMA queries cannot also be performed in a READ-WRITE transaction :-(
+
+## Previously no advisory for expensive operations nor observability
+- In March 2018 after brainstorming with Pritam, I wrote an article guiding folks for how to use [OpenCensus with Cloud Spanner in Java and Go](https://orijtech.medium.com/cloud-spanner-instrumented-by-opencensus-and-exported-to-stackdriver-6ed61ed6ab4e)
+- It revealed cold start issues with CreateSession, and CreateTransaction, and also Cloud Spanner internally too after I sent a whole bunch of requests and triggered some alarms
+- Caused a bit of an uproar within internal Spanner engineering, and even ropped in then engineering director Damian Reeves who personally replied and debugged issues
+- Snap struggled with super high latency and didn't have any reasoning for why, I chimed in with data per [google-go-cloud/#207](https://github.com/googleapis/google-cloud-go/issues/1207)
+- Why were customers guessing when we've got the most modern tools, and pioneered observability? Dapper, Census, OpenCensus all sparked multi-billion dollar industries
+- Partly fixed with [Troubleshooting app latency with Cloud Spanner and OpenCensus](https://cloud.google.com/solutions/troubleshooting-app-latency-with-cloud-spanner-and-opencensus)
+
+## Column types can't be changed
+- To change a data type, you have to create an entirely new table, transform/migrate all the data, then delete the prior table -- this is very inconvenient and can go on indefinitely, something businesses might get a bitter taste in their mouths about
+
+## No support for renaming tables and columns
+- Makes Database schema migrations and renames impossible -- requires an expensive and laborious migration, can leave bitter tastes in one's mouth
+
+## Casting DATE to TIMESTAMP unexpectedly adds an hour
+- Helped out by Andrew Byrne, who showed that we should always use "SELECT TIMESTAMP(date_column, 'GMT') FROM TBL"
+- The solution works for that DATE->TIMESTAMP, but not  when the ORM casts between  TIMESTAMP->TIMESTAMP given that Cloud Spanner can't type check on field names
+
+## Lots of casting to do with IFNULL
+- Lots of boiler plate needed for arithmetic functions when doing additions from dynamically typed languages
+- Can't easily pass in parameters for addition lest: google.api_core.exceptions.InvalidArgument: 400 Operands of + cannot be literal
+
+## Foreign keys lack "ON DELETE CASCADE"
+- Foreign keys were added to Cloud Spanner announced on Thursday 5th March 2020
+- Unfortunately can't delete related rows when a foreign key is deleted
+- Can't support most ORMs
+- Customers have to write their own specialized deletion routines, know which tables are associated
+- Customers have to learn about using INFORMATION_SCHEMA
+- Big surprise here, and requires Cloud Spanner expertise, to swap in for table interleaving but that's hacking now
+- Due to lack of proper support for FOREIGN KEY so can't properly delete per [spanner-django/#313](https://github.com/googleapis/python-spanner-django/issues/313), nor for any other ORM
+
+## Impossible to compare TIMESTAMP & DATE
+- Unfortunately this crashes queries, despite the ability to use `TIMESTAMP(date_column, "GMT")`
+- At query time, the field type is unknown so this is an unsolved problem
+
+## Lack of SQL triggers
+- The inability to intercept events due to lack of SQL triggers makes it a problem to react to events that make traditional SQL databases useful
+- Also  a feature that's been used for decades
+- Perhaps a combination of PubSub + Cloud Functions? Cloud Run?
+
+## Inability to directly use Unicode as column names, without quoting values
+- `SELECT (1) AS föö, 2 as umläut` fails
+- Seemingly not easily available information on the docs website
+- Required a pass over every single SQL query to backtick as per [spanner-django#374](https://github.com/googleapis/python-spanner-django/pull/374)
+- Had to spend time debugging this failure on my own time
+
+## 10 second transaction timeouts are impossible to deal with, yet no easy transaction replay
+- While the [10 second timeout](https://cloud.google.com/spanner/docs/reference/rest/v1/TransactionOptions#idle-transactions) is understandable for Cloud Spanner, in the rest of the world without those limits, trying to transfer directly is almost impossible
+- Had to get my hands dirty and dive into the Python Cloud Spanner API and try to build this
+- This setup delayed my project by months, and ran over my budget by a lot
+
+## Lack of support for proper transaction replay
+- The Cloud Spanner Ruby, Python, Go clients lacked proper transaction replay which uses checksumming to validate replay
+- Added for python-spanner, but seemingly not for Ruby and Go
+
+## Lack of an FAQ and specialized guides
+- We need an FAQ for transparency that quickly informs one about what they need to know
+- There is a guide for [PostgreSQL migration](https://cloud.google.com/spanner/docs/migrating-postgres-spanner) but that doesn't cover missing features and unknowns
+- I had to ask a whole lot of questions, and get clarifications that roped in engineering leaders within the organization
+- I've helped Googlers with Cloud Spanner, and built a previously almost impossible set of integrations, but objectively if I could struggle, that means the average builder is having it worse
+
+## Low administrative limits
+- When building the various integrations, had to run multiple tests, hundreds every single day in parallel, 5 QPS is super duper low and wasted lots of time and money
+- It took almost a week to get a response from the Cloud Spanner team to increase our limits for creating and tearing down databases
+- Most customers won't be privileged to have direct relationships with Cloud Spanner engineering for help
+
+## Mutation limit per commit of 20,000
+- The number of mutations per commit being capped at 20,000 unfortunately doesn't mention the number of properties per mutation
+- This means a bunch of insertions and updates will fail and give odd errors, unless customers manually do the calculations
+- Such constraints make it very hard for companies without highly technical engineers to operate and fix problems
+- This is a leaky abstraction beccause it exposes implementation details to users of APIs that are supposed to shield against complexity
+- Solution: this work can be offloaded to every API client, just like in the Go BigTable API client
+
+## Statistical functions weren't supported for a long time
+- Variance and Standard Deviation were not supported until June 2020 (way long after I was supposed to have completed developed)
+- These were necessary for Django and Ruby-on-Rails users
+- Lack of non-trivial statistical functions means composite queries can't be done with Cloud Spanner
+
+## Focusing on complexity of concepts as opposed to simplifying them
+- Planet scalability, and the highest availability are amazing, but what does that mean for my aunt's pizza shop, what about for a bank, what about for Twitter?
+- There are 2 kinds of READS with Cloud Spanner: Strong reads, Stale reads
+- Zero advisory on when to use each, if you ask some Cloud Spanner team members when to use them in real life, but they can all explain what these are
+- Everyone can explain why you need transactions, but somehow allow the fact that we can't run INFORMATION_SCHEMA queries in a READ-WRITE transaction
+- Everyone understands why we need non-hotspotting PRIMARY KEYs, but why this couldn't be abstracted by the database
+- Customers shouldn't even have to know about hotspotting: that should be specialized knowledge for performance engineering and Cloud Spanner should make customers so successful that this is handled by the backend
+
+## Dissonance between Client library maintainers and Cloud Spanner Engineering
+- Getting answers for many problems encountered by asking the folks in charge of client libraries was very slow
+- They are very overwhelmed, would have to relay questions to engineers, and that takes forever
+- Huge burden expecting customers to intricately write their own engineering patches over the Cloud Spanner libraries to support lacking features
+- Engineering mandate seemed to give direction that customers shouldn't keep transactions open for long, yet this is a case that Python experts within Google could build and remove the burden from customers
+- Guides show how to get started, until you go in and have to swim in the deep all alone: I had to experiment and dig through Cloud Spanner technical docs myself, burnt through my time and money budgets
+
+## Migration tools are manual
+- We've got [HarbourBridge](https://github.com/cloudspannerecosystem/harbourbridge) which is nice for a mid-size but non-production migration from PostgreSQL to Cloud Spanner
+- Problem is that doing a database migration can take an indefinitely long time given that some apps can't be taken offline, nor shutdown
+- No migration tools for MySQL nor for OracleDB, nor AuroraDB :-(
+- No simulation tools to convince companies to switch over to Google tools and databases entirely, by sending over traffic to Cloud Spanner and executing queries then returning results and timing, directly comparing against their current systems
+- Solving this kind of issue will rely on tools that intercept and sniff traffic, and have AST rewriters of sort -- credit to Louis Ryan with whom I discussed this idea on December 23rd 2019 at lunch in MP1
+- Less invasive tools
+
+## Migration tool: SQL sniffer -> AST rewrite -> Cloud Spanner
+<center><img src="./sqlsniff-AST-rewriter.png" width="600vh" /></center>
+
+## Suggestions
+- An aggressive approach towards building off the shelf applications, and using Cloud Spanner as customers would -- skin in the game
+- We used this approach to test out that things worked alright for django-spanner and activerecord-spanner, and it revealed lots of oddities
+- Offload functionality to the database server itself
+- API clients should implement logic to handle replay, batching of transactions within limits, counting and splitting up mutations
+- Fix low administrative limits -- it took a week
+- Make it a sin to tell customers to perform complex work on their own
+- FAQ with a bunch of listed caveats that developers can quickly ramp up to
+- Skin in the game with teams that focus on building applications with customers and not just listing features that are lacking and letting customers suffer alone
+
+## Suggestions
+- Look at [SQLCommenter](https://cloud.google.com/blog/topics/developers-practitioners/introducing-sqlcommenter-open-source-orm-auto-instrumentation-library) and [Cloud SQL insights](https://cloud.google.com/blog/products/databases/get-ahead-of-database-performance-issues-with-cloud-sql-insights) -- the ability to auto analyze performance for Cloud Spanner is a huge game changer that solves observability problems
+- Thinking outside the box to ensure that the teams in charge of the API clients have enough attachment to engineering and can quickly answer questions
+- Just like everyone somehow is on-call, customer success and API usability should be a tenet too
+- Follow the mission/mantra of Google aggressively, apply that for databases and work relentlessly
+
+## What do you think?
+<center><img src="./shrug.png" width="460vh" /></center>
+
+## Shout outs to folks encountered on the journey
+- Many folks on the Cloud Spanner team have been very helpful
+- Pritam Shah, Vikram Manghani, John Corwin, Skylar Pottinger, Shanika Kuruppu, Ben Vandiver, Fuad Malikov, Youssef Barakat, Jiren Patel, Andrew Byrne, Damian Reeves, Xinhua Ji, Vikas Kedia, Di Xiao, Sailesh Krishnamurthy,  Bala Chandrasekaran, Chris Kleinknecht, Mark Lu, Tim Graham, Nevin Heintze, Cliff Frey, Campbell Fraser and many more folks involved behind the scenes, plus the entire Cloud Spanner team
+
+## References
+- [Cloud Spanner landing page]()
+- [DB-Engines Ranking of Relational DBMS](https://db-engines.com/en/ranking/relational+dbms)
+- [django-spanner](https://github.com/googleapis/python-spanner-django)
+- [activerecord-spanner](https://github.com/googleapis/ruby-spanner-activerecord)
+- [Cloud Spanner feature release notes](https://cloud.google.com/spanner/docs/release-notes)
+- [PlanetScale Data:: hired by Elon Musk](https://techcrunch.com/2018/12/13/planetscale/)
+- [Sugu Software Daily interview about Vitess scaling MySQL](https://www.softwaredaily.com/post/5afaad94a7d5220004cfd48f/vitess-scaling-mysql-with-sugu-sougoumarane)
+- [Cloud Spanner types of reads](https://cloud.google.com/spanner/docs/reads)
+- [PlanetScale Data](https://www.planetscale.com/)
+- [Companies using Django per Stackshare](https://stackshare.io/django)
+- [Companies using ActiveRecord per Stackshare](https://stackshare.io/django)
