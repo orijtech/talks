@@ -1,0 +1,254 @@
+# Go, as the machine guides
+Tags: go, high-performance
+
+Emmanuel T Odeke
+Orijtech, Inc.
+Thu 2 Dec 2021
+emmanuel@orijtech.com
+https://go.orijtech.com
+@odeke_et
+
+## Go, as the machine guides
+
+## Let the machine guide you
+- "Genius of Alexander, Marie Louise Elisabeth Vigée-Lebrun, 1814"
+<center><img src="./geniusOfAlexander.jpg" width="450vh" /></center>
+
+## About this talk
+- Dissecting some common scenarios
+- Empowering you with productivity and dexterity with the Go programming language
+- High performance engineering tools and tips
+- Digging deeper than the surface shows
+- Pragmatic problem solving
+- Real world experiences and examples
+- Let the machine guide you!
+
+## About myself
+- Emmanuel T Odeke
+- Building [Orijtech, Inc](https://orijtech.com/)
+- Enjoy learning and solving problems; I am mostly self taught
+- Always learning
+- Avid open source producer and consumer
+- Core contributor and leader on the [Go programming language](https://golang.org/)
+- Core contributor and leader on [OpenCensus](https://opencensus.io/) and [OpenTelemetry](https://opentelemetry.io/)
+- Always learning, and enjoy solving problems!
+- Building critical and high performance software engineering tools like Go, static analyzers, CI/CD infrastructure, databases, observability infrastructure, security infrastructure
+
+## About Go
+- The Go programming language is the undisputed language of the cloud
+- 30+% of the Fortune 100 use Go, including American Express
+- Modern, simple, maintainable, very fast, robust, performant, easy to learn and teach
+- Highly productive language
+- Been public for 12 years since (November 8th 2009) after release from Google
+- Very smart people who deeply care about developer productivity & efficiency
+- Mature language collaboratively contributed to by the community
+- It has hidden gems that we should all wield
+
+## Go as the machine guides
+- What's odd about this code? You encounter it in a code review
+
+.play sanitize_balances.go
+
+- You could say perhaps `sdk.AccAddressFromBech32` returns an error that's ignored?
+
+## How do we know?
+
+## How do we know?
+- We build upon layers of unknowns and code we can't all examine
+- We can't fix what we can't measure nor perceive
+- Guess work can't cut it to find needles in haystacks
+- The entropy/number of chaotic states is indefinite so we need a way to get to answers really fast
+
+## Responses
+- Context matters
+- Should it be of concern?
+- If the code is in a hot loop, it matters
+- If it isn't significantly called, it doesn't matter
+- How can we figure out if it slow? How could we examine and fix these problems?
+- How important is it?
+- CPU and RAM profiling...[pprof](https://go.dev/blog/pprof/) to the rescue
+- We should use it to non-invasively examine the states of our programs...
+
+## CPU and RAM Profiling
+- Modern CPUs have frequencies of >2.1Ghz frequency -- they run 2.1 billion times a second
+- Sampling profiling stops the CPU 100 times a second and inquires about the program counter plus state of the heap
+- Guiding light that'll show you where you've expended resources
+- No need to guess what is going on
+- pprof was designed and built in C++, at Google in about 2001 by the esteemed Sanjay Ghemawat
+
+## Back to that seemingly innocent code...
+- What if I told you that this code caused issues for a $150+B market cap ecosystem?
+
+.play sanitize_balances.go
+
+## Profile of the code in context
+<center><img src="./cpuProfileOfCode.jpg" width="630vh" /></center>
+
+## What was up with that code?
+- The number of accounts was large e.g. 100,000+ accounts
+- Invoked sort.Slice (Quicksort in Go) which is a O(n^2) algorithm
+- Performed heavy work in a loop and discarded address parsing
+- Also some unnecessary work and unnecessary byteslice->string comparisons when looking up maps
+- The compound effect was super slow code that had a toll on launches for these folks
+- Oops
+
+## Remedy
+- After exorcising the problem, it showed that we needed to only parse addresses once, then use the already memoized values
+- Applying map zero byteslice->string conversion in a map look up radically reduced expenses in every dimension by more than 90%
+- CPU time reduced by -92.46%
+- Allocation counts per operation reduced by -93.76%
+- Allocated bytes per operation reduced by -93.76%
+- Very happy customers!
+
+## Exhibit
+- Visit [cosmos-sdk/pull#8719](https://github.com/cosmos/cosmos-sdk/pull/8719) and you'll see the radical improvement
+
+<center><img src="./xbank-improvement.png" width="630vh" /></center>
+
+## The state of your HTTP2 servers in Go
+
+## Debugging HTTP servers (HTTP/2)
+- HTTP/2 is quite popular, https://americanexpress.com uses it!
+- Almost all consumer businesses are accessible via a website
+- Go has a mature set of libraries for networking [net/*](https://golang.org/pkg/net) and [net/http/*](https://golang.org/pkg/net/http)
+
+.play enable_http2.go
+
+## net/http GODEBUG=http2debug=2
+- Prime example was finding an insidious bug in Google Cloud Storage's new storage metadata engine that was written in C++ in June 2019
+- Bug was ["storage: fix TestIntegration_Objects": issue #1482](https://github.com/googleapis/google-cloud-go/issues/1482/)
+- We couldn't blame cosmic rays for some of the requests crashing with a 5XX status code and non-uniformly
+- I used `GODEBUG=http2debug=2` and sent 10s of thousands of requests then tallied up the failures and discovered oddities
+- Passing metadata JSON of `{"contentType": null}` caused the new production C++ backend to crash, it hadn't been properly fuzzed nor tested; a static analyzer could have caught this
+- Caused a production freeze at Google for a while
+
+## Wholistic state of your HTTP and gRPC services?
+
+## Observability
+- Ability to examine the states of your system
+- Introspection of programs requires intricate tools and methods
+- Tracing and metrics are user defined mechanisms that get added to applications and require context propagation as systems talk to each other
+- OpenCensus->OpenTelemetry
+- What happens when you can't edit the source?
+- Usually there will be instrumented frameworks, but you might need to import code or manually edit code
+- Some code requires intricate edits, which at times might not be possible
+- Let the machine guide you
+
+## Go performance tips
+
+## Continuous benchmarking
+- Code changes across small parts of code can build up into something much more
+- Without knowing how your change affects general parts of your code, you are flying blind
+- Orijtech Inc produced the world's s first continuous benchmarking product, firstly focused on the Go programming language
+
+## map[string(byteslice)] to retrieve values
+- For maps, the keys are required to be immutable and hashable
+- When retrieving a value, directly perform the byteslice->string conversion when retrieving the value. The Go compiler
+recognizes this pattern as a read-only operation and will perform the reflect.StringHeader retrieval for you
+
+.play map_key.go
+
+## map clearing idiom
+- Simply use a loop that iterates over keys & invoke `delete(m, key)`
+
+.play map_clearing_idiom.go
+
+## map clearing idiom benchmark results
+- If we visit [bencher/perfclinic/map-clearing-idiom](https://bencher.orijtech.com/perfclinic/mapclearing/) and examine the results
+<center><img src="./mapsdeletion-verdict-results.png" width="1000vh" /></center>
+
+## Unsafe/reflect
+- Importing ["unsafe"](https://golang.org/pkg/unsafe) in your Go programs comes with a banner warning "Packages that import unsafe may be non-portable and are not protected by the Go 1 compatibility guidelines."
+- However, if say you have hot code that allocates a byte slice and you need to parse its string value, so it'll never be referenced out of that section
+- unsafe.Pointer and reflect.SliceHeader/reflect.StringHeader come in
+- Actual case for further speeding up American Express' "simplemli" per [americanexpress/simplemli/pull#4](https://github.com/americanexpress/simplemli/pull/4)
+- Reduction results in elimination of allocations in Decode.MLIA4E
+
+## Byteslice <-> string conversion
+.play unsafe_conversions.go
+
+## Unsafe+Reflect results in americanexpress/simplemli
+Available at [americanexpress/simplemli/pull/4](https://github.com/americanexpress/simplemli/pull/4)
+<center><img src="./unsafe-simplemli.png" width="1000vh" /></center>
+
+## Unintended byteslice->string conversion penalty with fmt.*printf
+- Some times when using fmt.*printf e.g. fmt.Sprintf, if any of the arguments are byteslices we might get tempted to convert it firstly to a string
+- string(byteslice) then invoke fmt.Sprintf
+- `fmt.Printf("This is my name: %s\n", string(nameInByteSlice))`
+- Expensive and unnecessary, please use the format specifier "%s" or "%q" which will handle the conversion to a string smartly
+- `fmt.Printf("This is my name: %s\n", nameInByteSlice)`
+- What is the impact of this change?
+- Lo and behold, benchmarking to the rescue so we don't have to guess
+- Please see https://dashboard.bencher.orijtech.com/benchmark/3245b8e4bbbd44a597480319aaa4b9fe
+
+## Letting fmt.*printf "%s" handle its conversions
+<center><img src="./fmt-timeop.png" /></center>
+<center><img src="./fmt-speed.png" /></center>
+
+## Letting fmt.*printf "%s" handle its conversions
+<center><img src="./fmt-Bop.png" /></center>
+<center><img src="./fmt-nop.png" /></center>
+
+## Scalable and more secure software development guided by the machine?
+
+## Static analyzers
+- Before code is run, examine the Abstract Syntax Tree (AST) and by rules, match patterns that are malformed or could cause insidious bugs
+- These help catch insidious bugs that could otherwise cause mayhem, runtime issues, crashes etc
+- Developer productivity and correctness are facets of high performance engineering
+- Just run `go test` or add staticcheck to your pipelines to run static analyzers
+- Orijtech Inc contributes static analyzers to the Go programming language and we've also got many more brewing
+- structslop, httperroyzer, sigchanyzer, tickeryzer, testinggoroutine, strconvparseuinterroryzer etc...
+
+## Internal states of the Go runtime?
+
+## runtime/trace
+- [runtime/trace](https://pkg.go.dev/runtime/trace) provides facilities for generating traces to use with the Go trace executioner
+- Prime example, in July 2019, the late Michael T Jones reported that [a particular test that checked the number of threads to have os file reads was failing](https://groups.google.com/g/golang-dev/c/NUlf99mA6YM)
+- Everyone on the Go development mailing list was puzzled and didn't know what was going on
+- While on a long haul flight back to California on August 29th 2019, I started investigating; as soon as I landed, rushed to my office whiteboard and modelled scenarios
+- Emailed MTJ and created custom code to collect runtime traces which indeed showed that there was something fishy going on and that a thread was taken for every read
+- I showed my findings at [golang.org/issue/32326](https://github.com/golang/go/issues/32326#issuecomment-526285691)
+
+## Findings
+- Serious bug against expectations of the Go runtime scheduler and runtime poller
+<center><img src="./trace_ncpu+nthreads.png" width="600vh" /></center>
+
+- In `runtime/sys_darwing.go`, when making a syscall, there was a typo to use `entersyscallblock()` instead of `entersyscall`
+- Cause confirmed & fixed by Minux Ma; bug shipped in Go1.12 and found in Go1.13
+
+## Scheduler and Garbage collector states
+- You can learn more by visiting the [Go runtime package's docs](https://golang.org/pkg/runtime/)
+- You can see what the scheduler is upto by passing `GODEBUG=scheddetail=1,schedtrace=X ./go_binary` where X is a value in milliseconds
+
+## Examining the generated assembly
+
+## Go Assembly examination
+- To examine generated code if you really want to dive in, please use `-S` when building your Go binaries
+- What does our "Hello, World!" produce?
+- When we run: go build -o hw.s -gcflags="-S" helloworld.go
+
+.play helloworld.go
+
+## Hello world Assembly
+<center><img src="./amex-hw-asm.png" width="1000vh" /></center>
+
+## Toolbox assembly
+
+## Summing it all up
+- With the arsenal of knowledge that we've garnered here, here is our summary
+- Add observability to your toolbox -- Jaeger, Zipkin, Prometheus, Expedia's Haystack are great open source alternatives, or a great APM provider
+- OpenCensus, OpenTelemetry to track higher level states of the system such as requests going into your application's server, monitoring to alert on traffic spikes
+- GODEBUG=http2debug=2 to debug your net/http HTTP/2 services
+- pprof and continuous profiling to dig deep into fine grained states of how your program behaves
+- runtime/trace and the Chrome trace viewer using `go tool trace file` to introspect the state of the Go scheduler
+- Add benchmarks to your code wholistically; adopt continuous benchmarking or visit Orijtech's own Bencher https://bencher.orijtech.com/
+- Use GODEBUG=scheddetail=1,schedtrace=X
+- Assembly examination
+
+## Reference materials
+- Russ S Cox [Profiling Go programs](https://go.dev/blog/pprof/)
+- Emmanuel T Odeke [FNIHCS, December 3rd 2020](https://orijtech.github.io/talks/2020/12/03/gosystemsconf/gosystemsconf.htm?f=1#1)
+- Emmanuel T Odeke [Taming net/http](https://medium.com/orijtech-developers/taming-net-http-b946edfda562)
+- Emmanuel T Odeke [OpenCensus for Go gRPC developers](https://medium.com/orijtech-developers/opencensus-for-go-grpc-developers-7f3ee1ac3d6d)
+- Emmanuel T Odeke ["Hello, world!" for web servers in Go with OpenCensus](https://medium.com/orijtech-developers/hello-world-for-web-servers-in-go-with-opencensus-29955b3f02c6)
+- Emmanuel T Odeke [x/bank/types: algorithmically fix pathologically slow code](https://github.com/cosmos/cosmos-sdk/pull/8719)

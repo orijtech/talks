@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)http://127.0.0.1:3999/gomachine.slide#1 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Go, as the machine guides</title>
+    
+    <script>
+      var notesEnabled =  false ;
+    </script>
+    <script src="./go_machine_guides_files/slides.js"></script>
+
+    
+
+    <script>
+      
+      if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+        var _gaq = _gaq || [];
+        _gaq.push(["_setAccount", "UA-11222381-6"]);
+        _gaq.push(["b._setAccount", "UA-49880327-6"]);
+        window.trackPageview = function() {
+          _gaq.push(["_trackPageview", location.pathname+location.hash]);
+          _gaq.push(["b._trackPageview", location.pathname+location.hash]);
+        };
+        window.trackPageview();
+        window.trackEvent = function(category, action, opt_label, opt_value, opt_noninteraction) {
+          _gaq.push(["_trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+          _gaq.push(["b._trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+        };
+      }
+    </script>
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1"><meta name="apple-mobile-web-app-capable" content="yes"></head>
+
+  <body style="display: none" class="loaded">
+
+    <section class="slides layout-widescreen" style="transform: scale(0.5024);">
+
+      <article class="current">
+        <h1>Go, as the machine guides</h1>
+        
+        
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+  
+  <p>
+    Thu 2 Dec 2021
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+  
+  
+      <article class="next">
+      
+        <h2>Go, as the machine guides</h2>
+      
+      <span class="pagenumber">2</span>
+      </article>
+  
+  
+  
+      <article class="far-next">
+      
+        <h3>Let the machine guide you</h3>
+        <ul>
+<li>"Genius of Alexander, Marie Louise Elisabeth Vigée-Lebrun, 1814"</li>
+</ul>
+<center><img src="./go_machine_guides_files/geniusOfAlexander.jpg" width="450vh"></center>
+      
+      <span class="pagenumber">3</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>About this talk</h3>
+        <ul>
+<li>Dissecting some common scenarios</li>
+<li>Empowering you with productivity and dexterity with the Go programming language</li>
+<li>High performance engineering tools and tips</li>
+<li>Digging deeper than the surface shows</li>
+<li>Pragmatic problem solving</li>
+<li>Real world experiences and examples</li>
+<li>Let the machine guide you!</li>
+</ul>
+
+      
+      <span class="pagenumber">4</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>About myself</h3>
+        <ul>
+<li>Emmanuel T Odeke</li>
+<li>Building <a href="https://orijtech.com/" target="_blank" rel="noopener">Orijtech, Inc</a></li>
+<li>Enjoy learning and solving problems; I am mostly self taught</li>
+<li>Always learning</li>
+<li>Avid open source producer and consumer</li>
+<li>Core contributor and leader on the <a href="https://golang.org/" target="_blank" rel="noopener">Go programming language</a></li>
+<li>Core contributor and leader on <a href="https://opencensus.io/" target="_blank" rel="noopener">OpenCensus</a> and <a href="https://opentelemetry.io/" target="_blank" rel="noopener">OpenTelemetry</a></li>
+<li>Always learning, and enjoy solving problems!</li>
+<li>Building critical and high performance software engineering tools like Go, static analyzers, CI/CD infrastructure, databases, observability infrastructure, security infrastructure</li>
+</ul>
+
+      
+      <span class="pagenumber">5</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>About Go</h3>
+        <ul>
+<li>The Go programming language is the undisputed language of the cloud</li>
+<li>30+% of the Fortune 100 use Go, including American Express</li>
+<li>Modern, simple, maintainable, very fast, robust, performant, easy to learn and teach</li>
+<li>Highly productive language</li>
+<li>Been public for 12 years since (November 8th 2009) after release from Google</li>
+<li>Very smart people who deeply care about developer productivity &amp; efficiency</li>
+<li>Mature language collaboratively contributed to by the community</li>
+<li>It has hidden gems that we should all wield</li>
+</ul>
+
+      
+      <span class="pagenumber">6</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Go as the machine guides</h3>
+        <ul>
+<li>What's odd about this code? You encounter it in a code review</li>
+</ul>
+
+  <div class="code playground">
+<pre><span num="1">// SanitizeGenesisBalances sorts addresses and coin sets.</span>
+<span num="2">func SanitizeGenesisBalances(balances []Balance) []Balance {</span>
+<span num="3">    sort.Slice(balances, func(i, j int) bool {</span>
+<span num="4">        addr1, _ := sdk.AccAddressFromBech32(balances[i].Address)</span>
+<span num="5">        addr2, _ := sdk.AccAddressFromBech32(balances[j].Address)</span>
+<span num="6">        return bytes.Compare(addr1.Bytes(), addr2.Bytes()) &lt; 0</span>
+<span num="7">    })</span>
+<span num="8"></span>
+<span num="9">    for _, balance := range balances {</span>
+<span num="10">        balance.Coins = balance.Coins.Sort()</span>
+<span num="11">    }</span>
+<span num="12"></span>
+<span num="13">    return balances</span>
+<span num="14">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+<ul>
+<li>You could say perhaps <code>sdk.AccAddressFromBech32</code> returns an error that's ignored?</li>
+</ul>
+
+      
+      <span class="pagenumber">7</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>How do we know?</h2>
+      
+      <span class="pagenumber">8</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>How do we know?</h3>
+        <ul>
+<li>We build upon layers of unknowns and code we can't all examine</li>
+<li>We can't fix what we can't measure nor perceive</li>
+<li>Guess work can't cut it to find needles in haystacks</li>
+<li>The entropy/number of chaotic states is indefinite so we need a way to get to answers really fast</li>
+</ul>
+
+      
+      <span class="pagenumber">9</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Responses</h3>
+        <ul>
+<li>Context matters</li>
+<li>Should it be of concern?</li>
+<li>If the code is in a hot loop, it matters</li>
+<li>If it isn't significantly called, it doesn't matter</li>
+<li>How can we figure out if it slow? How could we examine and fix these problems?</li>
+<li>How important is it?</li>
+<li>CPU and RAM profiling...<a href="https://go.dev/blog/pprof/" target="_blank" rel="noopener">pprof</a> to the rescue</li>
+<li>We should use it to non-invasively examine the states of our programs...</li>
+</ul>
+
+      
+      <span class="pagenumber">10</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>CPU and RAM Profiling</h3>
+        <ul>
+<li>Modern CPUs have frequencies of &gt;2.1Ghz frequency -- they run 2.1 billion times a second</li>
+<li>Sampling profiling stops the CPU 100 times a second and inquires about the program counter plus state of the heap</li>
+<li>Guiding light that'll show you where you've expended resources</li>
+<li>No need to guess what is going on</li>
+<li>pprof was designed and built in C++, at Google in about 2001 by the esteemed Sanjay Ghemawat</li>
+</ul>
+
+      
+      <span class="pagenumber">11</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Back to that seemingly innocent code...</h3>
+        <ul>
+<li>What if I told you that this code caused issues for a $150+B market cap ecosystem?</li>
+</ul>
+
+  <div class="code playground">
+<pre><span num="1">// SanitizeGenesisBalances sorts addresses and coin sets.</span>
+<span num="2">func SanitizeGenesisBalances(balances []Balance) []Balance {</span>
+<span num="3">    sort.Slice(balances, func(i, j int) bool {</span>
+<span num="4">        addr1, _ := sdk.AccAddressFromBech32(balances[i].Address)</span>
+<span num="5">        addr2, _ := sdk.AccAddressFromBech32(balances[j].Address)</span>
+<span num="6">        return bytes.Compare(addr1.Bytes(), addr2.Bytes()) &lt; 0</span>
+<span num="7">    })</span>
+<span num="8"></span>
+<span num="9">    for _, balance := range balances {</span>
+<span num="10">        balance.Coins = balance.Coins.Sort()</span>
+<span num="11">    }</span>
+<span num="12"></span>
+<span num="13">    return balances</span>
+<span num="14">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">12</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Profile of the code in context</h3>
+        <center><img src="./go_machine_guides_files/cpuProfileOfCode.jpg" width="630vh"></center>
+      
+      <span class="pagenumber">13</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>What was up with that code?</h3>
+        <ul>
+<li>The number of accounts was large e.g. 100,000+ accounts</li>
+<li>Invoked sort.Slice (Quicksort in Go) which is a O(n^2) algorithm</li>
+<li>Performed heavy work in a loop and discarded address parsing</li>
+<li>Also some unnecessary work and unnecessary byteslice-&gt;string comparisons when looking up maps</li>
+<li>The compound effect was super slow code that had a toll on launches for these folks</li>
+<li>Oops</li>
+</ul>
+
+      
+      <span class="pagenumber">14</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Remedy</h3>
+        <ul>
+<li>After exorcising the problem, it showed that we needed to only parse addresses once, then use the already memoized values</li>
+<li>Applying map zero byteslice-&gt;string conversion in a map look up radically reduced expenses in every dimension by more than 90%</li>
+<li>CPU time reduced by -92.46%</li>
+<li>Allocation counts per operation reduced by -93.76%</li>
+<li>Allocated bytes per operation reduced by -93.76%</li>
+<li>Very happy customers!</li>
+</ul>
+
+      
+      <span class="pagenumber">15</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Exhibit</h3>
+        <ul>
+<li>Visit <a href="https://github.com/cosmos/cosmos-sdk/pull/8719" target="_blank" rel="noopener">cosmos-sdk/pull#8719</a> and you'll see the radical improvement</li>
+</ul>
+<center><img src="./go_machine_guides_files/xbank-improvement.png" width="630vh"></center>
+      
+      <span class="pagenumber">16</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>The state of your HTTP2 servers in Go</h2>
+      
+      <span class="pagenumber">17</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Debugging HTTP servers (HTTP/2)</h3>
+        <ul>
+<li>HTTP/2 is quite popular, https://americanexpress.com uses it!</li>
+<li>Almost all consumer businesses are accessible via a website</li>
+<li>Go has a mature set of libraries for networking <a href="https://golang.org/pkg/net" target="_blank" rel="noopener">net/*</a> and <a href="https://golang.org/pkg/net/http" target="_blank" rel="noopener">net/http/*</a></li>
+</ul>
+
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">func main() {</span>
+<span num="4">    ts := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {</span>
+<span num="5">        fmt.Fprintf(w, "Hello, %s", r.Proto)</span>
+<span num="6">    }))</span>
+<span num="7">    ts.EnableHTTP2 = true</span>
+<span num="8">    ts.StartTLS()</span>
+<span num="9">    defer ts.Close()</span>
+<span num="10"></span>
+<span num="11">    res, err := ts.Client().Get(ts.URL)</span>
+<span num="12">    if err != nil {</span>
+<span num="13">        log.Fatal(err)</span>
+<span num="14">    }</span>
+<span num="15">    greeting, err := ioutil.ReadAll(res.Body)</span>
+<span num="16">    res.Body.Close()</span>
+<span num="17">    if err != nil { panic(err) }</span>
+<span num="18">        println(string(greeting))</span>
+<span num="19">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">18</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>net/http GODEBUG=http2debug=2</h3>
+        <ul>
+<li>Prime example was finding an insidious bug in Google Cloud Storage's new storage metadata engine that was written in C++ in June 2019</li>
+<li>Bug was <a href="https://github.com/googleapis/google-cloud-go/issues/1482/" target="_blank" rel="noopener">"storage: fix TestIntegration_Objects": issue #1482</a></li>
+<li>We couldn't blame cosmic rays for some of the requests crashing with a 5XX status code and non-uniformly</li>
+<li>I used <code>GODEBUG=http2debug=2</code> and sent 10s of thousands of requests then tallied up the failures and discovered oddities</li>
+<li>Passing metadata JSON of <code>{"contentType": null}</code> caused the new production C++ backend to crash, it hadn't been properly fuzzed nor tested; a static analyzer could have caught this</li>
+<li>Caused a production freeze at Google for a while</li>
+</ul>
+
+      
+      <span class="pagenumber">19</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Wholistic state of your HTTP and gRPC services?</h2>
+      
+      <span class="pagenumber">20</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Observability</h3>
+        <ul>
+<li>Ability to examine the states of your system</li>
+<li>Introspection of programs requires intricate tools and methods</li>
+<li>Tracing and metrics are user defined mechanisms that get added to applications and require context propagation as systems talk to each other</li>
+<li>OpenCensus-&gt;OpenTelemetry</li>
+<li>What happens when you can't edit the source?</li>
+<li>Usually there will be instrumented frameworks, but you might need to import code or manually edit code</li>
+<li>Some code requires intricate edits, which at times might not be possible</li>
+<li>Let the machine guide you</li>
+</ul>
+
+      
+      <span class="pagenumber">21</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Go performance tips</h2>
+      
+      <span class="pagenumber">22</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Continuous benchmarking</h3>
+        <ul>
+<li>Code changes across small parts of code can build up into something much more</li>
+<li>Without knowing how your change affects general parts of your code, you are flying blind</li>
+<li>Orijtech Inc produced the world's s first continuous benchmarking product, firstly focused on the Go programming language</li>
+</ul>
+
+      
+      <span class="pagenumber">23</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>map[string(byteslice)] to retrieve values</h3>
+        <ul>
+<li>For maps, the keys are required to be immutable and hashable</li>
+<li>When retrieving a value, directly perform the byteslice-&gt;string conversion when retrieving the value. The Go compiler
+recognizes this pattern as a read-only operation and will perform the reflect.StringHeader retrieval for you</li>
+</ul>
+
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">func main() {</span>
+<span num="4">    m := map[string]int{"ten": 10}</span>
+<span num="5">    ten := []byte("ten")</span>
+<span num="6">    // Expensive way.</span>
+<span num="7">    key := string(ten)</span>
+<span num="8">    println(m[key])</span>
+<span num="9"></span>
+<span num="10">    // Cheap way.</span>
+<span num="11">    println(m[string(ten)])</span>
+<span num="12">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">24</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>map clearing idiom</h3>
+        <ul>
+<li>Simply use a loop that iterates over keys &amp; invoke <code>delete(m, key)</code></li>
+</ul>
+
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">func clearNonFast(m map[string]int) {</span>
+<span num="4">    keys := make([]string, 0, len(m))</span>
+<span num="5">    for key := range m {</span>
+<span num="6">        keys = append(keys, key)</span>
+<span num="7">    }</span>
+<span num="8"></span>
+<span num="9">    // Do something with keys.</span>
+<span num="10">    // _ = keys</span>
+<span num="11">    for _, key := range keys {</span>
+<span num="12">        delete(m, key)</span>
+<span num="13">    }</span>
+<span num="14">}</span>
+<span num="15"></span>
+<span num="16">func clearFast(m map[string]int) {</span>
+<span num="17">    for key := range m {</span>
+<span num="18">        delete(m, key)</span>
+<span num="19">    }</span>
+<span num="20">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">25</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>map clearing idiom benchmark results</h3>
+        <ul>
+<li>If we visit <a href="https://bencher.orijtech.com/perfclinic/mapclearing/" target="_blank" rel="noopener">bencher/perfclinic/map-clearing-idiom</a> and examine the results</li>
+</ul>
+<center><img src="./go_machine_guides_files/mapsdeletion-verdict-results.png" width="1000vh"></center>
+      
+      <span class="pagenumber">26</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Unsafe/reflect</h3>
+        <ul>
+<li>Importing <a href="https://golang.org/pkg/unsafe" target="_blank" rel="noopener">"unsafe"</a> in your Go programs comes with a banner warning "Packages that import unsafe may be non-portable and are not protected by the Go 1 compatibility guidelines."</li>
+<li>However, if say you have hot code that allocates a byte slice and you need to parse its string value, so it'll never be referenced out of that section</li>
+<li>unsafe.Pointer and reflect.SliceHeader/reflect.StringHeader come in</li>
+<li>Actual case for further speeding up American Express' "simplemli" per <a href="https://github.com/americanexpress/simplemli/pull/4" target="_blank" rel="noopener">americanexpress/simplemli/pull#4</a></li>
+<li>Reduction results in elimination of allocations in Decode.MLIA4E</li>
+</ul>
+
+      
+      <span class="pagenumber">27</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Byteslice &lt;-&gt; string conversion</h3>
+        
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "fmt"</span>
+<span num="5">    "reflect"</span>
+<span num="6">    "unsafe"</span>
+<span num="7">)</span>
+<span num="8"></span>
+<span num="9">func unsafeByteSliceToStr(b []byte) string {</span>
+<span num="10">    return *(*string)(unsafe.Pointer(&amp;b))</span>
+<span num="11">}</span>
+<span num="12"></span>
+<span num="13">func unsafeStrToByteSlice(s string) (b []byte) {</span>
+<span num="14">    hdr := (*reflect.SliceHeader)(unsafe.Pointer(&amp;b))</span>
+<span num="15">    hdr.Cap = len(s)</span>
+<span num="16">    hdr.Len = len(s)</span>
+<span num="17">    hdr.Data = (*reflect.StringHeader)(unsafe.Pointer(&amp;s)).Data</span>
+<span num="18">    return b</span>
+<span num="19">}</span>
+<span num="20"></span>
+<span num="21">func main() {</span>
+<span num="22">    fmt.Printf("%q\n", unsafeByteSliceToStr([]byte("string")))</span>
+<span num="23">    fmt.Printf("% x\n", unsafeStrToByteSlice("string"))</span>
+<span num="24">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">28</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Unsafe+Reflect results in americanexpress/simplemli</h3>
+        <p>Available at <a href="https://github.com/americanexpress/simplemli/pull/4" target="_blank" rel="noopener">americanexpress/simplemli/pull/4</a></p>
+<center><img src="./go_machine_guides_files/unsafe-simplemli.png" width="1000vh"></center>
+      
+      <span class="pagenumber">29</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Unintended byteslice-&gt;string conversion penalty with fmt.*printf</h3>
+        <ul>
+<li>Some times when using fmt.*printf e.g. fmt.Sprintf, if any of the arguments are byteslices we might get tempted to convert it firstly to a string</li>
+<li>string(byteslice) then invoke fmt.Sprintf</li>
+<li><code>fmt.Printf("This is my name: %s\n", string(nameInByteSlice))</code></li>
+<li>Expensive and unnecessary, please use the format specifier "%s" or "%q" which will handle the conversion to a string smartly</li>
+<li><code>fmt.Printf("This is my name: %s\n", nameInByteSlice)</code></li>
+<li>What is the impact of this change?</li>
+<li>Lo and behold, benchmarking to the rescue so we don't have to guess</li>
+<li>Please see https://dashboard.bencher.orijtech.com/benchmark/3245b8e4bbbd44a597480319aaa4b9fe</li>
+</ul>
+
+      
+      <span class="pagenumber">30</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Letting fmt.*printf "%s" handle its conversions</h3>
+        <center><img src="./go_machine_guides_files/fmt-timeop.png"></center>
+<center><img src="./go_machine_guides_files/fmt-speed.png"></center>
+      
+      <span class="pagenumber">31</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Letting fmt.*printf "%s" handle its conversions</h3>
+        <center><img src="./go_machine_guides_files/fmt-Bop.png"></center>
+<center><img src="./go_machine_guides_files/fmt-nop.png"></center>
+      
+      <span class="pagenumber">32</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Scalable and more secure software development guided by the machine?</h2>
+      
+      <span class="pagenumber">33</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Static analyzers</h3>
+        <ul>
+<li>Before code is run, examine the Abstract Syntax Tree (AST) and by rules, match patterns that are malformed or could cause insidious bugs</li>
+<li>These help catch insidious bugs that could otherwise cause mayhem, runtime issues, crashes etc</li>
+<li>Developer productivity and correctness are facets of high performance engineering</li>
+<li>Just run <code>go test</code> or add staticcheck to your pipelines to run static analyzers</li>
+<li>Orijtech Inc contributes static analyzers to the Go programming language and we've also got many more brewing</li>
+<li>structslop, httperroyzer, sigchanyzer, tickeryzer, testinggoroutine, strconvparseuinterroryzer etc...</li>
+</ul>
+
+      
+      <span class="pagenumber">34</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Internal states of the Go runtime?</h2>
+      
+      <span class="pagenumber">35</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>runtime/trace</h3>
+        <ul>
+<li><a href="https://pkg.go.dev/runtime/trace" target="_blank" rel="noopener">runtime/trace</a> provides facilities for generating traces to use with the Go trace executioner</li>
+<li>Prime example, in July 2019, the late Michael T Jones reported that <a href="https://groups.google.com/g/golang-dev/c/NUlf99mA6YM" target="_blank" rel="noopener">a particular test that checked the number of threads to have os file reads was failing</a></li>
+<li>Everyone on the Go development mailing list was puzzled and didn't know what was going on</li>
+<li>While on a long haul flight back to California on August 29th 2019, I started investigating; as soon as I landed, rushed to my office whiteboard and modelled scenarios</li>
+<li>Emailed MTJ and created custom code to collect runtime traces which indeed showed that there was something fishy going on and that a thread was taken for every read</li>
+<li>I showed my findings at <a href="https://github.com/golang/go/issues/32326#issuecomment-526285691" target="_blank" rel="noopener">golang.org/issue/32326</a></li>
+</ul>
+
+      
+      <span class="pagenumber">36</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Findings</h3>
+        <ul>
+<li>Serious bug against expectations of the Go runtime scheduler and runtime poller</li>
+</ul>
+<center><img src="./go_machine_guides_files/trace_ncpu+nthreads.png" width="600vh"></center>
+<ul>
+<li>In <code>runtime/sys_darwing.go</code>, when making a syscall, there was a typo to use <code>entersyscallblock()</code> instead of <code>entersyscall</code></li>
+<li>Cause confirmed &amp; fixed by Minux Ma; bug shipped in Go1.12 and found in Go1.13</li>
+</ul>
+
+      
+      <span class="pagenumber">37</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Scheduler and Garbage collector states</h3>
+        <ul>
+<li>You can learn more by visiting the <a href="https://golang.org/pkg/runtime/" target="_blank" rel="noopener">Go runtime package's docs</a></li>
+<li>You can see what the scheduler is upto by passing <code>GODEBUG=scheddetail=1,schedtrace=X ./go_binary</code> where X is a value in milliseconds</li>
+</ul>
+
+      
+      <span class="pagenumber">38</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Examining the generated assembly</h2>
+      
+      <span class="pagenumber">39</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Go Assembly examination</h3>
+        <ul>
+<li>To examine generated code if you really want to dive in, please use <code>-S</code> when building your Go binaries</li>
+<li>What does our "Hello, World!" produce?</li>
+<li>When we run: go build -o hw.s -gcflags="-S" helloworld.go</li>
+</ul>
+
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">func main() {</span>
+<span num="4">    println("An honor to be at American Express.. Don't live life without it!")</span>
+<span num="5">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">40</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Hello world Assembly</h3>
+        <center><img src="./go_machine_guides_files/amex-hw-asm.png" width="1000vh"></center>
+      
+      <span class="pagenumber">41</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Toolbox assembly</h2>
+      
+      <span class="pagenumber">42</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Summing it all up</h3>
+        <ul>
+<li>With the arsenal of knowledge that we've garnered here, here is our summary</li>
+<li>Add observability to your toolbox -- Jaeger, Zipkin, Prometheus, Expedia's Haystack are great open source alternatives, or a great APM provider</li>
+<li>OpenCensus, OpenTelemetry to track higher level states of the system such as requests going into your application's server, monitoring to alert on traffic spikes</li>
+<li>GODEBUG=http2debug=2 to debug your net/http HTTP/2 services</li>
+<li>pprof and continuous profiling to dig deep into fine grained states of how your program behaves</li>
+<li>runtime/trace and the Chrome trace viewer using <code>go tool trace file</code> to introspect the state of the Go scheduler</li>
+<li>Add benchmarks to your code wholistically; adopt continuous benchmarking or visit Orijtech's own Bencher https://bencher.orijtech.com/</li>
+<li>Use GODEBUG=scheddetail=1,schedtrace=X</li>
+<li>Assembly examination</li>
+</ul>
+
+      
+      <span class="pagenumber">43</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Reference materials</h3>
+        <ul>
+<li>Russ S Cox <a href="https://go.dev/blog/pprof/" target="_blank" rel="noopener">Profiling Go programs</a></li>
+<li>Emmanuel T Odeke <a href="https://orijtech.github.io/talks/2020/12/03/gosystemsconf/gosystemsconf.htm?f=1#1" target="_blank" rel="noopener">FNIHCS, December 3rd 2020</a></li>
+<li>Emmanuel T Odeke <a href="https://medium.com/orijtech-developers/taming-net-http-b946edfda562" target="_blank" rel="noopener">Taming net/http</a></li>
+<li>Emmanuel T Odeke <a href="https://medium.com/orijtech-developers/opencensus-for-go-grpc-developers-7f3ee1ac3d6d" target="_blank" rel="noopener">OpenCensus for Go gRPC developers</a></li>
+<li>Emmanuel T Odeke <a href="https://medium.com/orijtech-developers/hello-world-for-web-servers-in-go-with-opencensus-29955b3f02c6" target="_blank" rel="noopener">"Hello, world!" for web servers in Go with OpenCensus</a></li>
+<li>Emmanuel T Odeke <a href="https://github.com/cosmos/cosmos-sdk/pull/8719" target="_blank" rel="noopener">x/bank/types: algorithmically fix pathologically slow code</a></li>
+</ul>
+
+      
+      <span class="pagenumber">44</span>
+      </article>
+  
+  
+
+      <article>
+        <h3>Thank you</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+  
+  <p>
+    Thu 2 Dec 2021
+  </p>
+  
+<p class="link"><a href="mailto:emmanuel@orijtech.com" target="_blank">emmanuel@orijtech.com</a></p><p class="link"><a href="https://go.orijtech.com/" target="_blank">https://go.orijtech.com</a></p><p class="link"><a href="http://twitter.com/odeke_et" target="_blank">@odeke_et</a></p>
+          </div>
+        
+      </article>
+
+    <div class="slide-area" id="prev-slide-area"></div><div class="slide-area" id="next-slide-area"></div></section>
+
+    <div id="help" style="display: none;">
+      Use the left and right arrow keys or click the left and right
+      edges of the page to navigate between slides.<br>
+      (Press 'H' or navigate to hide this message.)
+    </div>
+
+    
+    <script src="./go_machine_guides_files/play.js"></script>
+    
+
+    <script>
+      (function() {
+        
+        if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+          var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+          ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+          var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+        }
+      })();
+    </script>
+  
+
+<link rel="stylesheet" type="text/css" href="./go_machine_guides_files/css"><link rel="stylesheet" type="text/css" href="./go_machine_guides_files/styles.css"></body></html>
