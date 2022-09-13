@@ -1,0 +1,166 @@
+# Go, at scale
+Tags: go, high-performance, productivity
+
+Emmanuel T Odeke
+Orijtech, Inc.
+Fri 2 Sep 2022
+emmanuel@orijtech.com
+https://go.orijtech.com
+@odeke_et
+
+## Go, at scale
+
+## About this talk
+- Go, at scale, so you can go to scale!
+- From this talk, you should have the tools to get web services up & running in production & also able to observe them & improve your services, plus profile & test them
+- Using Go to enhance and take your productivity to hyperscale development
+- Scale: elastic growth/grace with the magnitude and intensity of a problem
+- Scale to mean team & engineering productivity from 0 to infinity
+- From startups to Fortune 500 companies: Go is a suitable tool to build production services
+- Wielding the power of Go can happen with the right focus, humility and urge to learn without pollution of ideas from past technologies
+- Open minds and the need for speed & productivity!
+- Lessons from running backend services at companies of all sizes: startup to Fortune 10 companies
+
+## About myself
+- Emmanuel T Odeke
+- Building [Orijtech, Inc](https://orijtech.com/)
+- Enjoy learning and solving problems; I am mostly self taught
+- Always learning
+- Avid open source producer and consumer
+- Core contributor and leader on the [Go programming language](https://golang.org/)
+- Core contributor and leader on [OpenCensus](https://opencensus.io/) and [OpenTelemetry](https://opentelemetry.io/)
+- Always learning, and enjoy solving problems!
+- Building critical and high performance software engineering tools like Go, static analyzers, CI/CD infrastructure, databases, observability infrastructure, security infrastructure
+
+## What is Go?
+- Go is a statically typed, statically linked programming language pioneered at Google
+- Brain child of Robert Griesemer, Rob Pike, Ken Thompson who conceptualized it allegedly while waiting for C++ builds to complete
+- Go Co-authors also acknowledged as Russ Cox, Ian Lance Taylor
+- Hashtag is "golang", language is "Go", website "golang.org"
+- Go is an expressive language built with principles of pragmatism and engineering productivity
+- Highly concurrent, modern to help utilize all the cores of modern machines
+- No need to sweat with pthreads directly nor re-inventing own scheduling yet getting it wrong
+- The undisputed language of the cloud!
+
+## Goroutine dispatched
+
+.play uncancellable.go
+
+## What's troublesome in that code?
+- Non-determinism in goroutines happens when the goroutine's course cannot be determined by external conditions nor can its termination be guaranteed
+- ** commentary in conversation in presentation **
+
+## Plumb with context
+- Context allows you to check that the context is still alive hence you can carry on work
+- Useful in situations such as an HTTP request's processing being stopped after a client goes away or when no longer needed
+- Multiplex on a channel with Go keyword "select"
+
+## Plumb with context
+.play cancellable1.go
+
+## Plumb with context: multiplex on channels with "select"
+.play cancellable2.go
+
+## HTTP request hedging
+- A powerful concept used to help with increasing reliability of backend services
+- Popularized by Google's Jeff Dean in [The Tail at scale](https://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext)
+- If a service keeps failing, try again with N requests and for the first that returns early, cancel all the rest
+- Trivial concept to implement natively in Go using [net/http.NewRequestWithContext](https://golang.org/pkg/net/http/#NewRequestWithContext)
+- Send out N requests derived from the same context `ctx`, get the first successful result and then cancel the context after parsing successfully from the working request
+- Keeps the machines well utilized!
+- Just by taking in a context.Context as well as multiplexing on a channel for results, you can race HTTP requests!
+- With first class features in Go, you now have the power to build prolific features!
+
+## Supply chain security
+
+## go.mod is a great forensic tool
+- go.mod and go.sum are 2 distinct files generated and used by the Go build system since Go1.15
+- Not just for decoration, they are an auditable trail of dependencies
+- Software Bill of Materials (SBOM) integrated first class into the language
+- Useful in pining dependencies but also in supply chain analysis
+- Read more about Go Modules at https://go.dev/ref/mod
+- Kudos to the Go security team for being this thoughtful!
+
+
+## Go networking & Remote Procedure Call (RPC) libraries
+- [net/http](https://golang.org/pkg/net/http) -- basis for majority of networking libraries and sufficient for most networking purposes
+- [gRPC library](https://google.golang.org/grpc) google.golang.org/grpc
+- [net/rpc](https://golang.org/pkg/net/rpc) -- deprecated though, please use gRPC
+- [Apache Thrift](https://pkg.go.dev/github.com/apache/thrift/lib/go/thrift)
+
+## Build microservices
+
+## Take advantage of Go's excellent networking to build microservices
+- Monoliths can be useful but they curtail creativity and development speed because teams can't experiment, rigorously test components and isolate failures when trouble occurs
+- Go has excellent networking libraries
+- Look at the package net/http
+- In less than 10 lines, we can make a production worthy server
+
+.play goprodserver.go
+
+## Tack on HTTPS with Let's Encrypt
+In 14 lines, we can use free TLS certificates from the gracious and awesome Let's Encrypt!
+
+.play goprodserver_lets_encrypt.go
+
+## Observability
+- Observability is the ability to examine the internal states of a system by checking on vital/critical representative signals
+- Think of what happens what you visit the doctor's office: instead of dissecting you just to figure out what's causing your headache, they'll firstly ask diagnosing questions and take tests
+- Comes from control theory and Linear Algebra in which if an equation is linearly solveable, you understand the system
+- For backend applications, we look at function and user defined traces, quantifiable metrics such as throughput (requests per second), memory consumed, file descriptors open, logs
+- Need a reliable data cruncher and techniques to sift through large amounts of data
+
+## Sample web app
+
+<img src="./architecture.jpg" width="950">
+
+## Observability
+<img src="./trace-visuals.png" width="600">
+
+## Observability libraries
+- OpenCensus Go (stable package)
+- OpenTelemetry Go (recommended newer version)
+- Recommended: [my talk at GoSF: Planet Scale observability with OpenCensus](https://orijtech.github.io/talks/2018/07/18/gosf/gosf.htm)
+
+## Observability results
+## Testing
+
+## Write packages that are self contained and testable
+- Business logic should be isolated in packages that can be well tested
+- Use Go's testing and coverage tools: `go test`, or `go test -coverprofile=out.cover && go tool cover -html=out.cover`
+- Can CPU & memory profile them using [runtime/pprof](https://golang.org/pkg/runtime/pprof) in tests too with: `go test -cpuprofile=prof.cpu -memprofile=prof.mem` and then use `go tool pprof prof.cpu` for CPU profiling examinations, or `go tool pprof prof.mem` for memory profiling examinations
+- Runtime tracing can be performed using the [runtime/trace](https://golang.org/pkg/runtime/trace) package
+
+## Effectively test out your services using finesse of the language
+- You should be able to test out your packages individually and aim for 100% coverage if possible
+- Even testing out HTTP handlers and servers is possible, please see [net/http/httptest](https://pkg.go.dev/net/http/httptest)
+- Study up on [Taming net/http by Orijtech Inc](https://medium.com/orijtech-developers/taming-net-http-b946edfda562)
+- First class fuzzing
+- Incorporate fuzzers and run them continuously, please see ossfuzz
+
+## Go security releases
+- Please update your Go releases often, keep in touch with the Go security mailing list at https://groups.google.com/g/golang-announce/
+- Update often, lots of gems and hardwork from the security team as well as the general Go releases
+- Most of the time, upgrading to the latest version gets you speed and feature improvements
+- Figure out a way of pushing out Go releases within your company
+- Take advantage of continuous integration and deployment (CI/CD) with the latest releases of Go
+- File bugs for oddities you might encounter!
+
+## Go Community
+- Go's community is welcoming, diverse, creative, of all kinds of sizes from startups
+- Take a look at the landing page [https://go.dev/](https://go.dev/)
+- File issues and check out [issues](https://golang.org/issues)
+- Contribute to Go! Fascinating way to learn, get in touch, give back, grow further, get needs met, have fun etc
+- Attend Go conferences, network for example [Gophercon 2022](https://www.gophercon.com/) for which [Orijtech Inc we are a continued proud sponsor :-)](https://www.gophercon.com/page/2035126/sponsors)
+- Go wiki at [https://github.com/golang/go/wiki](https://github.com/golang/go/wiki)
+- [Visit the Go community listing showing: Go Forum, Gopher Slack, r/golang, Twitter, StackOverflow pages etc](https://github.com/golang/go/wiki#the-go-community)
+
+## References
+- [Planet scale observability with OpenCensus: Emmanuel Odeke, Orijtech Inc:: July 18th 2018, Go San Francisco](https://orijtech.github.io/talks/2018/07/18/gosf/gosf.htm)
+- [The Tail at scale: Jeffrey Dean, Luiz André Barroso, Google Inc:: February 2013, ACM Publications](https://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext) 
+- [The Go Programming Language and Environment: Russ Cox, Robert Griesemer, Rob Pike, Ian Lance Taylor, Ken Thompson:: May 2022, ACM Publications](https://cacm.acm.org/magazines/2022/5/260357-the-go-programming-language-and-environment/fulltext)
+- [Go Modules References](https://go.dev/ref/mod)
+- [Taming net/http: Emmanuel Odeke, Orijtech Inc:: May 20th 2020, Medium](https://medium.com/orijtech-developers/taming-net-http-b946edfda562)
+- [Go announce](https://groups.google.com/g/golang-announce/)
+- [Go, as the machine guides: Emmanuel Odeke, Orijtech Inc:: December 2nd 2021, American Express](https://orijtech.github.io/talks/2021/12/02/amex/go_machine_guides.htm)
+- [Finding Needles in Haystacks, and Chaotic Systems!: Emmanuel Odeke, Orijtech Inc:: December 3rd 2020, All Systems Go](https://orijtech.github.io/talks/2020/12/03/gosystemsconf/gosystemsconf.htm#1)

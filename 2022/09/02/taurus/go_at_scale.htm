@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)http://127.0.0.1:3999/goatscale.slide#1 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Go, at scale</title>
+    
+    <script>
+      var notesEnabled =  false ;
+    </script>
+    <script src="./go_at_scale_files/slides.js"></script>
+
+    
+
+    <script>
+      
+      if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+        var _gaq = _gaq || [];
+        _gaq.push(["_setAccount", "UA-11222381-6"]);
+        _gaq.push(["b._setAccount", "UA-49880327-6"]);
+        window.trackPageview = function() {
+          _gaq.push(["_trackPageview", location.pathname+location.hash]);
+          _gaq.push(["b._trackPageview", location.pathname+location.hash]);
+        };
+        window.trackPageview();
+        window.trackEvent = function(category, action, opt_label, opt_value, opt_noninteraction) {
+          _gaq.push(["_trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+          _gaq.push(["b._trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+        };
+      }
+    </script>
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1"><meta name="apple-mobile-web-app-capable" content="yes"></head>
+
+  <body style="display: none" class="loaded">
+
+    <section class="slides layout-widescreen" style="transform: scale(0.538667);">
+
+      <article class="current">
+        <h1>Go, at scale</h1>
+        
+        
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+  
+  <p>
+    Fri 2 Sep 2022
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+  
+  
+      <article class="next">
+      
+        <h2>Go, at scale</h2>
+      
+      <span class="pagenumber">2</span>
+      </article>
+  
+  
+  
+      <article class="far-next">
+      
+        <h3>About this talk</h3>
+        <ul>
+<li>Go, at scale, so you can go to scale!</li>
+<li>From this talk, you should have the tools to get web services up &amp; running in production &amp; also able to observe them &amp; improve your services, plus profile &amp; test them</li>
+<li>Using Go to enhance and take your productivity to hyperscale development</li>
+<li>Scale: elastic growth/grace with the magnitude and intensity of a problem</li>
+<li>Scale to mean team &amp; engineering productivity from 0 to infinity</li>
+<li>From startups to Fortune 500 companies: Go is a suitable tool to build production services</li>
+<li>Wielding the power of Go can happen with the right focus, humility and urge to learn without pollution of ideas from past technologies</li>
+<li>Open minds and the need for speed &amp; productivity!</li>
+<li>Lessons from running backend services at companies of all sizes: startup to Fortune 10 companies</li>
+</ul>
+
+      
+      <span class="pagenumber">3</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>About myself</h3>
+        <ul>
+<li>Emmanuel T Odeke</li>
+<li>Building <a href="https://orijtech.com/" target="_blank" rel="noopener">Orijtech, Inc</a></li>
+<li>Enjoy learning and solving problems; I am mostly self taught</li>
+<li>Always learning</li>
+<li>Avid open source producer and consumer</li>
+<li>Core contributor and leader on the <a href="https://golang.org/" target="_blank" rel="noopener">Go programming language</a></li>
+<li>Core contributor and leader on <a href="https://opencensus.io/" target="_blank" rel="noopener">OpenCensus</a> and <a href="https://opentelemetry.io/" target="_blank" rel="noopener">OpenTelemetry</a></li>
+<li>Always learning, and enjoy solving problems!</li>
+<li>Building critical and high performance software engineering tools like Go, static analyzers, CI/CD infrastructure, databases, observability infrastructure, security infrastructure</li>
+</ul>
+
+      
+      <span class="pagenumber">4</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>What is Go?</h3>
+        <ul>
+<li>Go is a statically typed, statically linked programming language pioneered at Google</li>
+<li>Brain child of Robert Griesemer, Rob Pike, Ken Thompson who conceptualized it allegedly while waiting for C++ builds to complete</li>
+<li>Go Co-authors also acknowledged as Russ Cox, Ian Lance Taylor</li>
+<li>Hashtag is "golang", language is "Go", website "golang.org"</li>
+<li>Go is an expressive language built with principles of pragmatism and engineering productivity</li>
+<li>Highly concurrent, modern to help utilize all the cores of modern machines</li>
+<li>No need to sweat with pthreads directly nor re-inventing own scheduling yet getting it wrong</li>
+<li>The undisputed language of the cloud!</li>
+</ul>
+
+      
+      <span class="pagenumber">5</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Goroutine dispatched</h3>
+        
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import "time"</span>
+<span num="4"></span>
+<span num="5">func dispatch(n int, fn func() error) chan error {</span>
+<span num="6">    ch := make(chan error, 1)</span>
+<span num="7">    go func() {</span>
+<span num="8">        defer close(ch)</span>
+<span num="9">        for i := 0; i &lt; n; i++ {</span>
+<span num="10">            if err := fn(); err != nil { ch &lt;- err }</span>
+<span num="11">        }</span>
+<span num="12">    }()</span>
+<span num="13">    return ch</span>
+<span num="14">}</span>
+<span num="15"></span>
+<span num="16">func main() {</span>
+<span num="17">    resCh := dispatch(1e7, func() error { time.Sleep(time.Second); return nil })</span>
+<span num="18">    if err := &lt;-resCh; err != nil {</span>
+<span num="19">        panic(err)</span>
+<span num="20">    }</span>
+<span num="21">    println("Completed")</span>
+<span num="22">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">6</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>What's troublesome in that code?</h3>
+        <ul>
+<li>Non-determinism in goroutines happens when the goroutine's course cannot be determined by external conditions nor can its termination be guaranteed</li>
+<li>** commentary in conversation in presentation **</li>
+</ul>
+
+      
+      <span class="pagenumber">7</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Plumb with context</h3>
+        <ul>
+<li>Context allows you to check that the context is still alive hence you can carry on work</li>
+<li>Useful in situations such as an HTTP request's processing being stopped after a client goes away or when no longer needed</li>
+<li>Multiplex on a channel with Go keyword "select"</li>
+</ul>
+
+      
+      <span class="pagenumber">8</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Plumb with context</h3>
+        
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "context"</span>
+<span num="5">    "os"</span>
+<span num="6">    "os/signal"</span>
+<span num="7">    "time"</span>
+<span num="8">)</span>
+<span num="9"></span>
+<span num="10">func dispatch(ctx context.Context, n int, fn func() error) chan error {</span>
+<span num="11">    ch := make(chan error, 1)</span>
+<span num="12">    go func() {</span>
+<span num="13">        defer close(ch)</span>
+<span num="14">        for i := 0; i &lt; n; i++ {</span>
+<span num="15">            if err := ctx.Err(); err != nil {</span>
+<span num="16">                if err != context.Canceled { ch &lt;- err }</span>
+<span num="17">                break</span>
+<span num="18">            }</span>
+<span num="19"></span>
+<span num="20">            if err := fn(); err != nil { ch &lt;- err }</span>
+<span num="21">        }</span>
+<span num="22">    }()</span>
+<span num="23">    return ch</span>
+<span num="24">}</span>
+<span num="25"></span>
+<span num="26">func main() {</span>
+<span num="27">    ctx, cancel := context.WithCancel(context.Background())</span>
+<span num="28">    sigCh := make(chan os.Signal, 1)</span>
+<span num="29">    signal.Notify(sigCh, os.Interrupt)</span>
+<span num="30">    go func() {</span>
+<span num="31">        defer cancel()</span>
+<span num="32">        select {</span>
+<span num="33">        case &lt;-time.After(5 * time.Second):</span>
+<span num="34">        case &lt;-sigCh:</span>
+<span num="35">        }</span>
+<span num="36">    }()</span>
+<span num="37"></span>
+<span num="38">    resCh := dispatch(ctx, 1e7, func() error {</span>
+<span num="39">        time.Sleep(time.Second)</span>
+<span num="40">        return nil</span>
+<span num="41">    })</span>
+<span num="42">    if err := &lt;-resCh; err != nil {</span>
+<span num="43">        panic(err)</span>
+<span num="44">    }</span>
+<span num="45">    println("Completed")</span>
+<span num="46">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">9</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Plumb with context: multiplex on channels with "select"</h3>
+        
+  <div class="code playground">
+<pre><span num="1">func main() {</span>
+<span num="2">    ctx, cancel := context.WithCancel(context.Background())</span>
+<span num="3">    sigCh := make(chan os.Signal, 1)</span>
+<span num="4">    signal.Notify(sigCh, os.Interrupt)</span>
+<span num="5">    go func() {</span>
+<span num="6">        defer cancel()</span>
+<span num="7">        select {</span>
+<span num="8">        case &lt;-time.After(5 * time.Second):</span>
+<span num="9">        case &lt;-sigCh:</span>
+<span num="10">        }</span>
+<span num="11">    }()</span>
+<span num="12"></span>
+<span num="13">    resCh := cancellable(ctx, 1e7, func() error {</span>
+<span num="14">        time.Sleep(time.Second)</span>
+<span num="15">        return nil</span>
+<span num="16">    })</span>
+<span num="17">    if err := &lt;-resCh; err != nil {</span>
+<span num="18">        panic(err)</span>
+<span num="19">    }</span>
+<span num="20">    println("Completed")</span>
+<span num="21">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">10</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>HTTP request hedging</h3>
+        <ul>
+<li>A powerful concept used to help with increasing reliability of backend services</li>
+<li>Popularized by Google's Jeff Dean in <a href="https://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext" target="_blank" rel="noopener">The Tail at scale</a></li>
+<li>If a service keeps failing, try again with N requests and for the first that returns early, cancel all the rest</li>
+<li>Trivial concept to implement natively in Go using <a href="https://golang.org/pkg/net/http/#NewRequestWithContext" target="_blank" rel="noopener">net/http.NewRequestWithContext</a></li>
+<li>Send out N requests derived from the same context <code>ctx</code>, get the first successful result and then cancel the context after parsing successfully from the working request</li>
+<li>Keeps the machines well utilized!</li>
+<li>Just by taking in a context.Context as well as multiplexing on a channel for results, you can race HTTP requests!</li>
+<li>With first class features in Go, you now have the power to build prolific features!</li>
+</ul>
+
+      
+      <span class="pagenumber">11</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Supply chain security</h2>
+      
+      <span class="pagenumber">12</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>go.mod is a great forensic tool</h3>
+        <ul>
+<li>go.mod and go.sum are 2 distinct files generated and used by the Go build system since Go1.15</li>
+<li>Not just for decoration, they are an auditable trail of dependencies</li>
+<li>Software Bill of Materials (SBOM) integrated first class into the language</li>
+<li>Useful in pining dependencies but also in supply chain analysis</li>
+<li>Read more about Go Modules at https://go.dev/ref/mod</li>
+<li>Kudos to the Go security team for being this thoughtful!</li>
+</ul>
+
+      
+      <span class="pagenumber">13</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Go networking &amp; Remote Procedure Call (RPC) libraries</h3>
+        <ul>
+<li><a href="https://golang.org/pkg/net/http" target="_blank" rel="noopener">net/http</a> -- basis for majority of networking libraries and sufficient for most networking purposes</li>
+<li><a href="https://google.golang.org/grpc" target="_blank" rel="noopener">gRPC library</a> google.golang.org/grpc</li>
+<li><a href="https://golang.org/pkg/net/rpc" target="_blank" rel="noopener">net/rpc</a> -- deprecated though, please use gRPC</li>
+<li><a href="https://pkg.go.dev/github.com/apache/thrift/lib/go/thrift" target="_blank" rel="noopener">Apache Thrift</a></li>
+</ul>
+
+      
+      <span class="pagenumber">14</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Build microservices</h2>
+      
+      <span class="pagenumber">15</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Take advantage of Go's excellent networking to build microservices</h3>
+        <ul>
+<li>Monoliths can be useful but they curtail creativity and development speed because teams can't experiment, rigorously test components and isolate failures when trouble occurs</li>
+<li>Go has excellent networking libraries</li>
+<li>Look at the package net/http</li>
+<li>In less than 10 lines, we can make a production worthy server</li>
+</ul>
+
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "fmt"</span>
+<span num="5">    "net/http"</span>
+<span num="6">    "time"</span>
+<span num="7">)</span>
+<span num="8"></span>
+<span num="9">func main() {</span>
+<span num="10">    http.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {</span>
+<span num="11">            fmt.Fprintf(rw, "The time now is: %s:🚨😎\n", time.Now())</span>
+<span num="12">    })</span>
+<span num="13">    panic(http.ListenAndServe(":8888", nil))</span>
+<span num="14">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">16</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Tack on HTTPS with Let's Encrypt</h3>
+        <p>In 14 lines, we can use free TLS certificates from the gracious and awesome Let's Encrypt!</p>
+
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "net/http"</span>
+<span num="5"></span>
+<span num="6">    "golang.org/x/crypto/acme/autocert"</span>
+<span num="7">)</span>
+<span num="8"></span>
+<span num="9">func main() {</span>
+<span num="10">    http.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {</span>
+<span num="11">        w.Write([]byte("Hello, TLS!"))</span>
+<span num="12">    })</span>
+<span num="13">    panic(http.Serve(autocert.NewListener("go.orijtech.com/taurus"), nil))</span>
+<span num="14">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">17</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Observability</h3>
+        <ul>
+<li>Observability is the ability to examine the internal states of a system by checking on vital/critical representative signals</li>
+<li>Think of what happens what you visit the doctor's office: instead of dissecting you just to figure out what's causing your headache, they'll firstly ask diagnosing questions and take tests</li>
+<li>Comes from control theory and Linear Algebra in which if an equation is linearly solveable, you understand the system</li>
+<li>For backend applications, we look at function and user defined traces, quantifiable metrics such as throughput (requests per second), memory consumed, file descriptors open, logs</li>
+<li>Need a reliable data cruncher and techniques to sift through large amounts of data</li>
+</ul>
+
+      
+      <span class="pagenumber">18</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Sample web app</h3>
+        <img src="./go_at_scale_files/architecture.jpg" width="950">
+      
+      <span class="pagenumber">19</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Observability</h3>
+        <img src="./go_at_scale_files/trace-visuals.png" width="600">
+      
+      <span class="pagenumber">20</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Observability libraries</h3>
+        <ul>
+<li>OpenCensus Go (stable package)</li>
+<li>OpenTelemetry Go (recommended newer version)</li>
+<li>Recommended: <a href="https://orijtech.github.io/talks/2018/07/18/gosf/gosf.htm" target="_blank" rel="noopener">my talk at GoSF: Planet Scale observability with OpenCensus</a></li>
+</ul>
+
+      
+      <span class="pagenumber">21</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Observability results</h2>
+      
+      <span class="pagenumber">22</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Testing</h2>
+      
+      <span class="pagenumber">23</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Write packages that are self contained and testable</h3>
+        <ul>
+<li>Business logic should be isolated in packages that can be well tested</li>
+<li>Use Go's testing and coverage tools: <code>go test</code>, or <code>go test -coverprofile=out.cover &amp;&amp; go tool cover -html=out.cover</code></li>
+<li>Can CPU &amp; memory profile them using <a href="https://golang.org/pkg/runtime/pprof" target="_blank" rel="noopener">runtime/pprof</a> in tests too with: <code>go test -cpuprofile=prof.cpu -memprofile=prof.mem</code> and then use <code>go tool pprof prof.cpu</code> for CPU profiling examinations, or <code>go tool pprof prof.mem</code> for memory profiling examinations</li>
+<li>Runtime tracing can be performed using the <a href="https://golang.org/pkg/runtime/trace" target="_blank" rel="noopener">runtime/trace</a> package</li>
+</ul>
+
+      
+      <span class="pagenumber">24</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Effectively test out your services using finesse of the language</h3>
+        <ul>
+<li>You should be able to test out your packages individually and aim for 100% coverage if possible</li>
+<li>Even testing out HTTP handlers and servers is possible, please see <a href="https://pkg.go.dev/net/http/httptest" target="_blank" rel="noopener">net/http/httptest</a></li>
+<li>Study up on <a href="https://medium.com/orijtech-developers/taming-net-http-b946edfda562" target="_blank" rel="noopener">Taming net/http by Orijtech Inc</a></li>
+<li>First class fuzzing</li>
+<li>Incorporate fuzzers and run them continuously, please see ossfuzz</li>
+</ul>
+
+      
+      <span class="pagenumber">25</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Go security releases</h3>
+        <ul>
+<li>Please update your Go releases often, keep in touch with the Go security mailing list at https://groups.google.com/g/golang-announce/</li>
+<li>Update often, lots of gems and hardwork from the security team as well as the general Go releases</li>
+<li>Most of the time, upgrading to the latest version gets you speed and feature improvements</li>
+<li>Figure out a way of pushing out Go releases within your company</li>
+<li>Take advantage of continuous integration and deployment (CI/CD) with the latest releases of Go</li>
+<li>File bugs for oddities you might encounter!</li>
+</ul>
+
+      
+      <span class="pagenumber">26</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Go Community</h3>
+        <ul>
+<li>Go's community is welcoming, diverse, creative, of all kinds of sizes from startups</li>
+<li>Take a look at the landing page <a href="https://go.dev/" target="_blank" rel="noopener">https://go.dev/</a></li>
+<li>File issues and check out <a href="https://golang.org/issues" target="_blank" rel="noopener">issues</a></li>
+<li>Contribute to Go! Fascinating way to learn, get in touch, give back, grow further, get needs met, have fun etc</li>
+<li>Attend Go conferences, network for example <a href="https://www.gophercon.com/" target="_blank" rel="noopener">Gophercon 2022</a> for which <a href="https://www.gophercon.com/page/2035126/sponsors" target="_blank" rel="noopener">Orijtech Inc we are a continued proud sponsor :-)</a></li>
+<li>Go wiki at <a href="https://github.com/golang/go/wiki" target="_blank" rel="noopener">https://github.com/golang/go/wiki</a></li>
+<li><a href="https://github.com/golang/go/wiki#the-go-community" target="_blank" rel="noopener">Visit the Go community listing showing: Go Forum, Gopher Slack, r/golang, Twitter, StackOverflow pages etc</a></li>
+</ul>
+
+      
+      <span class="pagenumber">27</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>References</h3>
+        <ul>
+<li><a href="https://orijtech.github.io/talks/2018/07/18/gosf/gosf.htm" target="_blank" rel="noopener">Planet scale observability with OpenCensus: Emmanuel Odeke, Orijtech Inc:: July 18th 2018, Go San Francisco</a></li>
+<li><a href="https://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext" target="_blank" rel="noopener">The Tail at scale: Jeffrey Dean, Luiz André Barroso, Google Inc:: February 2013, ACM Publications</a></li>
+<li><a href="https://cacm.acm.org/magazines/2022/5/260357-the-go-programming-language-and-environment/fulltext" target="_blank" rel="noopener">The Go Programming Language and Environment: Russ Cox, Robert Griesemer, Rob Pike, Ian Lance Taylor, Ken Thompson:: May 2022, ACM Publications</a></li>
+<li><a href="https://go.dev/ref/mod" target="_blank" rel="noopener">Go Modules References</a></li>
+<li><a href="https://medium.com/orijtech-developers/taming-net-http-b946edfda562" target="_blank" rel="noopener">Taming net/http: Emmanuel Odeke, Orijtech Inc:: May 20th 2020, Medium</a></li>
+<li><a href="https://groups.google.com/g/golang-announce/" target="_blank" rel="noopener">Go announce</a></li>
+<li><a href="https://orijtech.github.io/talks/2021/12/02/amex/go_machine_guides.htm" target="_blank" rel="noopener">Go, as the machine guides: Emmanuel Odeke, Orijtech Inc:: December 2nd 2021, American Express</a></li>
+<li><a href="https://orijtech.github.io/talks/2020/12/03/gosystemsconf/gosystemsconf.htm#1" target="_blank" rel="noopener">Finding Needles in Haystacks, and Chaotic Systems!: Emmanuel Odeke, Orijtech Inc:: December 3rd 2020, All Systems Go</a></li>
+</ul>
+
+      
+      <span class="pagenumber">28</span>
+      </article>
+  
+  
+
+      <article>
+        <h3>Thank you</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+  
+  <p>
+    Fri 2 Sep 2022
+  </p>
+  
+<p class="link"><a href="mailto:emmanuel@orijtech.com" target="_blank">emmanuel@orijtech.com</a></p><p class="link"><a href="https://go.orijtech.com/" target="_blank">https://go.orijtech.com</a></p><p class="link"><a href="http://twitter.com/odeke_et" target="_blank">@odeke_et</a></p>
+          </div>
+        
+      </article>
+
+    <div class="slide-area" id="prev-slide-area"></div><div class="slide-area" id="next-slide-area"></div></section>
+
+    <div id="help" style="display: none;">
+      Use the left and right arrow keys or click the left and right
+      edges of the page to navigate between slides.<br>
+      (Press 'H' or navigate to hide this message.)
+    </div>
+
+    
+    <script src="./go_at_scale_files/play.js"></script>
+    
+
+    <script>
+      (function() {
+        
+        if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+          var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+          ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+          var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+        }
+      })();
+    </script>
+  
+
+<link rel="stylesheet" type="text/css" href="./go_at_scale_files/css"><link rel="stylesheet" type="text/css" href="./go_at_scale_files/styles.css"></body></html>
