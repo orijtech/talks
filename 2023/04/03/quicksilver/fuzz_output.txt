@@ -1,0 +1,37 @@
+$ go test -fuzz=.
+fuzz: elapsed: 0s, gathering baseline coverage: 0/3 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 3/3 completed, now fuzzing with 8 workers
+fuzz: minimizing 27-byte failing input file
+fuzz: elapsed: 0s, minimizing
+--- FAIL: FuzzIt (0.03s)
+    --- FAIL: FuzzIt (0.00s)
+        testing.go:1488: panic: runtime error: index out of range [0] with length 0
+            goroutine 16 [running]:
+            runtime/debug.Stack()
+            	/Users/emmanuelodeke/go/src/go.googlesource.com/go/src/runtime/debug/stack.go:24 +0x9b
+            testing.tRunner.func1()
+            	/Users/emmanuelodeke/go/src/go.googlesource.com/go/src/testing/testing.go:1488 +0x1f2
+            panic({0x11d3340?, 0xc0000221b0?})
+            	/Users/emmanuelodeke/go/src/go.googlesource.com/go/src/runtime/panic.go:912 +0x21f
+            github.com/ingenuity-build/quicksilver/testing-beefing/fuzzing.codeToBeFuzzed(...)
+            	/Users/emmanuelodeke/go/src/github.com/ingenuity-build/quicksilver/testing-beefing/fuzzing/fuzz_test.go:9
+            github.com/ingenuity-build/quicksilver/testing-beefing/fuzzing.FuzzIt.func1(0x0?, {0x0?, 0x0?})
+            	/Users/emmanuelodeke/go/src/github.com/ingenuity-build/quicksilver/testing-beefing/fuzzing/fuzz_test.go:26 +0x275
+            reflect.Value.call({0x11b1c40?, 0x11f1800?, 0x13?}, {0x11e269a, 0x4}, {0xc00009c7e0, 0x2, 0x2?})
+            	/Users/emmanuelodeke/go/src/go.googlesource.com/go/src/reflect/value.go:586 +0xb25
+            reflect.Value.Call({0x11b1c40?, 0x11f1800?, 0x1310960?}, {0xc00009c7e0?, 0x11e1d80?, 0x1114aed?})
+            	/Users/emmanuelodeke/go/src/go.googlesource.com/go/src/reflect/value.go:370 +0xb9
+            testing.(*F).Fuzz.func1.1(0x0?)
+            	/Users/emmanuelodeke/go/src/go.googlesource.com/go/src/testing/fuzz.go:335 +0x3e5
+            testing.tRunner(0xc000202b60, 0xc0000fa2d0)
+            	/Users/emmanuelodeke/go/src/go.googlesource.com/go/src/testing/testing.go:1579 +0xff
+            created by testing.(*F).Fuzz.func1 in goroutine 18
+            	/Users/emmanuelodeke/go/src/go.googlesource.com/go/src/testing/fuzz.go:322 +0x597
+            
+    
+    Failing input written to testdata/fuzz/FuzzIt/5838cdfae7b16cde
+    To re-run:
+    go test -run=FuzzIt/5838cdfae7b16cde
+FAIL
+exit status 1
+FAIL	testing-beefing/fuzzing	0.163s

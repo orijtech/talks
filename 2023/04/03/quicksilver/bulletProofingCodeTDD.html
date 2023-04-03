@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)http://127.0.0.1:3999/bulletproofing.slide#1 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Bullet proofing your code, products with better testing, dexterity and skills/finesse</title>
+    
+    <script>
+      var notesEnabled =  false ;
+    </script>
+    <script src="./bulletProofingCodeTDD_files/slides.js"></script>
+
+    
+
+    <script>
+      
+      if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+        var _gaq = _gaq || [];
+        _gaq.push(["_setAccount", "UA-11222381-6"]);
+        _gaq.push(["b._setAccount", "UA-49880327-6"]);
+        window.trackPageview = function() {
+          _gaq.push(["_trackPageview", location.pathname+location.hash]);
+          _gaq.push(["b._trackPageview", location.pathname+location.hash]);
+        };
+        window.trackPageview();
+        window.trackEvent = function(category, action, opt_label, opt_value, opt_noninteraction) {
+          _gaq.push(["_trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+          _gaq.push(["b._trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+        };
+      }
+    </script>
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1"><meta name="apple-mobile-web-app-capable" content="yes"></head>
+
+  <body style="display: none" class="loaded">
+
+    <section class="slides layout-widescreen" style="transform: scale(0.358667);">
+
+      <article class="current">
+        <h1>Bullet proofing your code, products with better testing, dexterity and skills/finesse</h1>
+        
+        
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+  
+  <p>
+    Mon 3 Apr 2023
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+  
+  
+      <article class="next">
+      
+        <h2>Bullet proofing your code, with better testing, dexterity and skills/finesse</h2>
+      
+      <span class="pagenumber">2</span>
+      </article>
+  
+  
+  
+      <article class="far-next">
+      
+        <h3>About myself</h3>
+        <ul>
+<li>Emmanuel T Odeke, CEO &amp; Chief Builder at Orijtech, Inc.</li>
+<li>Core contributor to the Go programming language, observability, Cosmos-SDK and various cloud computing technologies</li>
+<li>Friend and contributor to QuickSilver: delighted and thankful for your great partnership business!</li>
+<li>Always learning and enjoys solving problems in all domains</li>
+<li>Optimistic about the future</li>
+<li>Believes in sharing as much information, skills, tips as possible to equip everyone with problem solving skills and also to learn!</li>
+<li>Proponent of testing code to prevent expensive retroactive fixes</li>
+</ul>
+
+      
+      <span class="pagenumber">3</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Why this talk?</h3>
+        <ul>
+<li>Failures of code in production are so expensive, violating user trust, costing money, demoralizing teams, break ecosystems</li>
+<li>Our cybersecurity division <a href="https://cyber.orijtech.com/" target="_blank" rel="noopener">cyber.orijtech.com</a> audited QuickSilver's code a couple of times in 2022, 2023 and we want y'all to be successful and scale -- put ourselves out of business</li>
+<li>Securing a product requires an all-inclusive mindset from the ground up</li>
+<li>In most cases, security falters due to being overwhelmed, a lack of knowledge, lack of the appropriate skills, inability to focus on core business logic, fighting fires, inability to respond in a reasonable time</li>
+<li>We've audited tons of code including cosmos-sdk, tendermint and related code</li>
+<li>Knowledge sharing and skills imparting is something we celebrate</li>
+<li>Prevent worst case scenarios by planning for them and mitigating them: stay a step ahead of disaster</li>
+</ul>
+
+      
+      <span class="pagenumber">4</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Basis</h3>
+        <ul>
+<li>Most of your code is written in the Go programming language</li>
+<li>Regardless of language, code and products have to be tested sufficiently</li>
+<li>Software development is a distributed and highly collaborative process to produce a common work output implementing business logic</li>
+<li>Can't fix what you can't gauge/measure!!</li>
+<li>User trust and all kinds of trust are built from reliability, beauty, good taste, pragmatic problem solving; your consumers and team know that whoever is handling something will do great at it</li>
+<li>Skills division: Adam Smith put it succinctly in "Wealth of Nations" that division of labour, specialization and expertise are needed to produce high quality goods and scale them: you can't do everything</li>
+<li>Disaster strikes always but what matters is the ability to get back and fix things in a timely manner</li>
+<li>Curiosity killed the cat, but for humans curiosity is a marvel that will allow you to always win!</li>
+<li>Everyone struggles continuously trying to have reliable and more secure products</li>
+</ul>
+
+      
+      <span class="pagenumber">5</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>What goes wrong?</h2>
+      
+      <span class="pagenumber">6</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Lack of finesse/dexterity/skill</h3>
+        <ul>
+<li>Inability to bend and control your environment is a big reason why folks cut corners; they'd rather spend that time developing features that are within inches of their reach rather than banging their heads against the wall</li>
+<li>This is usually the biggest problem facing most developers</li>
+<li>In order for one to get their code tested, they need dexterity and knowledge of how to setup their code so that it can operate effectively</li>
+<li>We want to go from zero to Hero!!</li>
+</ul>
+<center><img width="240vh" src="./bulletProofingCodeTDD_files/giphy.gif"></center>
+      
+      <span class="pagenumber">7</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Steps to getting better?</h2>
+      
+      <span class="pagenumber">8</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Test Driven Development</h3>
+        <ul>
+<li>Software methodology in which before code is written, figure out inputs, outputs and tests for correctness</li>
+<li>In practice most people conveniently write code firstly but before submitting code for code review, send related tests</li>
+<li>Write as many unique tests that cover various parts of your code</li>
+<li>More unique cases that take diverse paths, make your code more robust</li>
+<li>Find and fix those failures before they find you</li>
+<li>Crashes, panics, exploits are ways that malicious actors can get into your systems or take them out and erode user trust</li>
+<li>Rigorous testin: think of tests as a guide to make your products much safer; a cultural paradigm shift</li>
+<li>Measuring rigor can happen by using the right tools to exorcise your code</li>
+<li>Enables you to follow specifications and find out their limits which is much more effective than fiddling for ages</li>
+</ul>
+
+      
+      <span class="pagenumber">9</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>How to get there?</h2>
+      
+      <span class="pagenumber">10</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Unit tests</h3>
+        <ul>
+<li>Unit tests ensure that specific behaviors can be empirically verified: <code>add(1, 10)=11</code>, <code>add(10, -11)=-1</code></li>
+<li>Useful as sanity tests to assert against target behavior</li>
+<li>However, can be deceptively comforting given that most code is complex and the human mind usually cannot
+think of all ways to exorcise code paths and inputs</li>
+<li>A group of unit tests can give some good assurances as we can enumerate as many test inputs</li>
+<li>How can we scale unit testing? How do we group a collection of such tests and pass in well known inputs and assert on outputs?</li>
+</ul>
+
+      
+      <span class="pagenumber">11</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Table tests</h3>
+        <ul>
+<li>Table tests are a collection of unit test inputs and desired outputs that we assert on to ensure functional integrity in a much more scalable way than just 1 unit test per function</li>
+</ul>
+
+  <div class="code">
+<pre><span num="1">func TestCode(t *testing.T) {</span>
+<span num="2">    tests := []struct {</span>
+<span num="3">        name string</span>
+<span num="4">        want any</span>
+<span num="5">        in   any</span>
+<span num="6">    }{{ /* Add your test cases here */ }, { /* More tests */ }}</span>
+<span num="7"></span>
+<span num="8">    for _, tt := range tests {</span>
+<span num="9">        tt := tt</span>
+<span num="10">        t.Run(tt.name, func(t *testing.T) {</span>
+<span num="11">            got, err := code(tt.in)</span>
+<span num="12">            if tt.wantErr != "" {</span>
+<span num="13">                return</span>
+<span num="14">            }</span>
+<span num="15">            if got != tt.want {</span>
+<span num="16">                t.Fatalf("Mismatch:\n\tGot:  %#v\n\tWant: %#v", got, tt.want)</span>
+<span num="17">            }</span>
+<span num="18">        })</span>
+<span num="19">    }</span>
+<span num="20">}</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">12</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Can't fix what we can't measure :-(</h2>
+      
+      <span class="pagenumber">13</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Test coverage measurements</h3>
+        <ul>
+<li>Unknowns beget unknowns: untested behavior is a death trap for your code in production</li>
+<li>You can't fix what you can't measure!</li>
+<li>Think of a way to illuminate darkness as you keep improving your test cases</li>
+<li>Go has just this tool <code>go test -coverprofile=out.cover ./... &amp;&amp; go tool cover -html=out.cover</code></li>
+<li>There are commercial tools like <a href="https://about.codecov.io/" target="_blank" rel="noopener">codecov</a> that you can link up to your CI/CD process to set targets for minimums required before any merge</li>
+</ul>
+
+      
+      <span class="pagenumber">14</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Coverage pictorial: red uncovered, green covered by tests</h3>
+        <center><img width="980vh" src="./bulletProofingCodeTDD_files/interchainquery-coverage.png"></center>
+      
+      <span class="pagenumber">15</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Some code review</h3>
+        
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import "errors"</span>
+<span num="4"></span>
+<span num="5">func myCode(input string) error {</span>
+<span num="6">        if len(input) == 0 { return errors.New("zero length") }</span>
+<span num="7">    if input[0] == '*' { return errors.New("no * expected") }</span>
+<span num="8">    if input[:3] == "foo" { return errors.New("foo is a reserved keyword") }</span>
+<span num="9">    return nil</span>
+<span num="10">}</span>
+<span num="11"></span>
+<span num="12">func main() {</span>
+<span num="13">        myCode("")</span>
+<span num="14">        myCode("*")</span>
+<span num="15">        myCode("qck")</span>
+<span num="16">        myCode("qk")</span>
+<span num="17">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">16</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>See that panic? We could patch it!</h3>
+        <ul>
+<li>However, we are playing cat and mouse and as code so much more complex, we need a breath of fresh
+air that's much more scalable</li>
+<li>How many failures can we spot in there immediately?</li>
+</ul>
+
+      
+      <span class="pagenumber">17</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Automated and guided test coverage?</h2>
+      
+      <span class="pagenumber">18</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Fuzzing</h3>
+        <ul>
+<li>An advanced automated testing technique that mostly operates by intelligently mutating known inputs and feeds them into code being tested, measuring changes in test coverage, watching out for panics, crashes, memory issues and other negative conditions: guided by the tester</li>
+<li>Fuzzing uses the power of the repetitive nature of computers along with some guiding from a human who described a score that'll reveal negative or positive examples so that the genetic mutation algorithms can work</li>
+<li>Go has native fuzzing support with the "testing" package and the "testing.F" type</li>
+<li>A huge nod to the excellent <a href="https://twitter.com/dvyukov" target="_blank" rel="noopener">Dmitry Vyukov</a> whose pioneering work wth <a href="https://github.com/dvyukov/go-fuzz" target="_blank" rel="noopener">dvyukov/go-fuzz</a> has made Go so much safer and made fuzzing main stream</li>
+<li>Google's <a href="https://google.github.io/oss-fuzz/" target="_blank" rel="noopener">oss-fuzz</a> is an excellent framework for automated fuzzing and at Orijtech Inc. put up the cosmos-sdk and tendermint plus other repositories for continuous fuzzing</li>
+</ul>
+
+      
+      <span class="pagenumber">19</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Fuzzing in action</h3>
+        <ul>
+<li>Following Go's guides at <a href="http://127.0.0.1:3999/bulletproofing.slide" target="_blank" rel="noopener">testing.F</a> we can write a fuzzer which we shall feed in initial inputs</li>
+</ul>
+
+  <div class="code">
+<pre><span num="1">func FuzzIt(f *testing.F) {</span>
+<span num="2">    // 1. Seed the fuzzer by adding in known/initial inputs.</span>
+<span num="3">    f.Add("abcd")</span>
+<span num="4">    f.Add("12adbe")</span>
+<span num="5">    f.Add("      ")</span>
+<span num="6"></span>
+<span num="7">    // 2. Now run the fuzzer.</span>
+<span num="8">    f.Fuzz(func(t *testing.T, input string) {</span>
+<span num="9">        if err := myCode(input); err != nil { /* Handle the error appropriately */ } })</span>
+<span num="10">}</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">20</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Run the fuzzer</h3>
+        
+  <div class="code">
+<pre><span num="1">$ go test -fuzz=.</span>
+<span num="2">fuzz: elapsed: 0s, gathering baseline coverage: 0/3 completed</span>
+<span num="3">fuzz: elapsed: 0s, gathering baseline coverage: 3/3 completed, now fuzzing with 8 workers</span>
+<span num="4">fuzz: minimizing 27-byte failing input file</span>
+<span num="5">fuzz: elapsed: 0s, minimizing</span>
+<span num="6">--- FAIL: FuzzIt (0.03s)</span>
+<span num="7">    --- FAIL: FuzzIt (0.00s)</span>
+<span num="8">        testing.go:1488: panic: runtime error: index out of range [0] with length 0</span>
+<span num="9">            goroutine 16 [running]:</span>
+<span num="10">            runtime/debug.Stack()</span>
+<span num="11">                /Users/emmanuelodeke/go/src/go.googlesource.com/go/src/runtime/debug/stack.go:24 +0x9b</span>
+<span num="12">            testing.tRunner.func1()</span>
+<span num="13">                /Users/emmanuelodeke/go/src/go.googlesource.com/go/src/testing/testing.go:1488 +0x1f2</span>
+<span num="14">            panic({0x11d3340?, 0xc0000221b0?})</span>
+<span num="15">                /Users/emmanuelodeke/go/src/go.googlesource.com/go/src/runtime/panic.go:912 +0x21f</span>
+<span num="16">            github.com/ingenuity-build/quicksilver/testing-beefing/fuzzing.codeToBeFuzzed(...)</span>
+<span num="17">                /Users/emmanuelodeke/go/src/github.com/ingenuity-build/quicksilver/testing-beefing/fuzzing/fuzz_test.go:9</span>
+<span num="18">            github.com/ingenuity-build/quicksilver/testing-beefing/fuzzing.FuzzIt.func1(0x0?, {0x0?, 0x0?})</span>
+<span num="19">                /Users/emmanuelodeke/go/src/github.com/ingenuity-build/quicksilver/testing-beefing/fuzzing/fuzz_test.go:26 +0x275</span>
+<span num="20">            reflect.Value.call({0x11b1c40?, 0x11f1800?, 0x13?}, {0x11e269a, 0x4}, {0xc00009c7e0, 0x2, 0x2?})</span>
+<span num="21">                /Users/emmanuelodeke/go/src/go.googlesource.com/go/src/reflect/value.go:586 +0xb25</span>
+<span num="22">            reflect.Value.Call({0x11b1c40?, 0x11f1800?, 0x1310960?}, {0xc00009c7e0?, 0x11e1d80?, 0x1114aed?})</span>
+<span num="23">                /Users/emmanuelodeke/go/src/go.googlesource.com/go/src/reflect/value.go:370 +0xb9</span>
+<span num="24">            testing.(*F).Fuzz.func1.1(0x0?)</span>
+<span num="25">                /Users/emmanuelodeke/go/src/go.googlesource.com/go/src/testing/fuzz.go:335 +0x3e5</span>
+<span num="26">            testing.tRunner(0xc000202b60, 0xc0000fa2d0)</span>
+<span num="27">                /Users/emmanuelodeke/go/src/go.googlesource.com/go/src/testing/testing.go:1579 +0xff</span>
+<span num="28">            created by testing.(*F).Fuzz.func1 in goroutine 18</span>
+<span num="29">                /Users/emmanuelodeke/go/src/go.googlesource.com/go/src/testing/fuzz.go:322 +0x597</span>
+<span num="30">            </span>
+<span num="31">    </span>
+<span num="32">    Failing input written to testdata/fuzz/FuzzIt/5838cdfae7b16cde</span>
+<span num="33">    To re-run:</span>
+<span num="34">    go test -run=FuzzIt/5838cdfae7b16cde</span>
+<span num="35">FAIL</span>
+<span num="36">exit status 1</span>
+<span num="37">FAIL    testing-beefing/fuzzing    0.163s</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">21</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Data race detector</h3>
+        <ul>
+<li>Always enable <code>go test -race</code> in your Go tests</li>
+<li>It'll save you tons of grief and help you catch insidious bugs!</li>
+</ul>
+
+      
+      <span class="pagenumber">22</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Hermetic networking</h3>
+        <ul>
+<li>Mutating, reading, erasing data in production poses financial, regulatory, privacy burdens and slow down growth and development of your business products</li>
+<li>"Hermetic networking" just means isolated/controlled netwoorks that don't have to hit production environments</li>
+<li>You can use a combination of mock servers, HTTP, gRPC servers, containers to run complex code all within your local network</li>
+<li>Hermetic networking will allow you to get the reigns of all kinds of networks</li>
+<li>Let's focus on HTTP and gRPC; same principles apply to other transports and frameworks</li>
+</ul>
+
+      
+      <span class="pagenumber">23</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>HTTP taming</h3>
+        <ul>
+<li>As Orijtech Inc, we published in May 2020 a guide <a href="https://medium.com/orijtech-developers/taming-net-http-b946edfda562" target="_blank" rel="noopener">"Taming net/http"</a> which can help you get the finesse to deal with HTTP networking and help you with keeping connections within your local/hermetic network</li>
+<li>With these skills you'll be able to test out your HTTP services against server specifications and not have to hit production databases</li>
+</ul>
+
+      
+      <span class="pagenumber">24</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>HTTP client wiring for hermetic network</h3>
+        
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "io/ioutil"</span>
+<span num="5">    "net/http"</span>
+<span num="6">    "net/http/httputil"</span>
+<span num="7">    "strings"</span>
+<span num="8">)</span>
+<span num="9"></span>
+<span num="10">type alwaysSameRoundTripper int</span>
+<span num="11">func (asrt *alwaysSameRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {</span>
+<span num="12">    res := &amp;http.Response{</span>
+<span num="13">        Status: "200 OK",StatusCode: 200, ProtoMajor: 1, ProtoMinor: 1,</span>
+<span num="14">        Header: http.Header{"x-backend": {"foo-bar"}}, Body: ioutil.NopCloser(strings.NewReader("Never left the network!")),</span>
+<span num="15">    }</span>
+<span num="16">    return res, nil</span>
+<span num="17">}</span>
+<span num="18">func main() {</span>
+<span num="19">    client := &amp;http.Client{Transport: new(alwaysSameRoundTripper)}</span>
+<span num="20">    res, err := client.Get("https://example.org/expensive/")</span>
+<span num="21">    if err != nil {    panic(err) }</span>
+<span num="22">    resBlob, err := httputil.DumpResponse(res, true)</span>
+<span num="23">    if err != nil { panic(err) }</span>
+<span num="24">    println(string(resBlob))</span>
+<span num="25">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">25</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>HTTP server wiring for hermetic network</h3>
+        
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "fmt"</span>
+<span num="5">    "io"</span>
+<span num="6">    "net/http"</span>
+<span num="7">    "net/http/httptest"</span>
+<span num="8">)</span>
+<span num="9"></span>
+<span num="10">func main() {</span>
+<span num="11">    cst := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {</span>
+<span num="12">        fmt.Fprintf(w, "Hello caller, your protocol is %s", r.Proto)</span>
+<span num="13">    }))</span>
+<span num="14">    defer cst.Close()</span>
+<span num="15">    res, err := cst.Client().Get(cst.URL)</span>
+<span num="16">    if err != nil {</span>
+<span num="17">        panic(err)</span>
+<span num="18">    }</span>
+<span num="19">    defer res.Body.Close()</span>
+<span num="20">    hello, err := io.ReadAll(res.Body)</span>
+<span num="21">    if err != nil {    panic(err) }</span>
+<span num="22">    println(string(hello))</span>
+<span num="23">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">26</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>gRPC server wiring for hermetic network</h3>
+        
+  <div class="code">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">func setupServer() {</span>
+<span num="4">    ln, err := net.Listen("tcp", ":0") // To auto-assign you an available local port</span>
+<span num="5">    if err != nil {</span>
+<span num="6">        panic(err)</span>
+<span num="7">    }</span>
+<span num="8"></span>
+<span num="9">    gsrv := grpc.NewServer()</span>
+<span num="10">    // Bind the gRPC service definitions being tested to this server</span>
+<span num="11">    gsrv.RegisterService(svcToTest, nil)</span>
+<span num="12"></span>
+<span num="13">    go func() {</span>
+<span num="14">        defer ln.Close()</span>
+<span num="15">        if err := gsrv.Listen(ln); err != nil {</span>
+<span num="16">            panic(err)</span>
+<span num="17">        }</span>
+<span num="18">    }()</span>
+<span num="19"></span>
+<span num="20">    // Now you can use the ln.Addr().String() to pass into the gRPC client</span>
+<span num="21">    targetAddrForClient := ln.Addr().String()</span>
+<span num="22"></span>
+<span num="23">        // Continue down below..</span>
+<span num="24">}</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">27</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>gRPC client wiring for hermetic network</h3>
+        
+  <div class="code">
+<pre><span num="1">import "google.golang.org/grpc"</span>
+<span num="2"></span>
+<span num="3">func spinUpClient(targetAddr string) {</span>
+<span num="4">    conn, err := grpc.DialContext(ctx, targetAddr, grpc.WithInsecure())</span>
+<span num="5">    if err != nil {</span>
+<span num="6">        panic(err)</span>
+<span num="7">    }</span>
+<span num="8">    defer conn.Close()</span>
+<span num="9"></span>
+<span num="10">    // Now you can use the gRPC connection in your generated gRPC service client.</span>
+<span num="11">}</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">28</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Container deployment harness and testing in code</h3>
+        
+  <div class="code">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">func testFetching(t *testing.T, sc *spanner.Client) {</span>
+<span num="4">    // Now your business logic in here as if you had a connection</span>
+<span num="5">    // to a production database.</span>
+<span num="6">}</span>
+<span num="7"></span>
+<span num="8">func setupCloudSpannerEmulator(t *testing.T, fnToRun func(*testing.T, *spanner.Client)) {</span>
+<span num="9">    runOpts := &amp;dockertest.RunOptions{</span>
+<span num="10">        Repository: "gcr.io/cloud-spanner-emulator/emulator",</span>
+<span num="11">        Tag:        "latest",</span>
+<span num="12">    }</span>
+<span num="13"></span>
+<span num="14">    pool, err := dockertest.NewPool("")</span>
+<span num="15">    if err != nil {</span>
+<span num="16">        t.Fatalf("Could not connect to docker: %s", err)</span>
+<span num="17">    }</span>
+<span num="18">    resource, err := pool.RunWithOptions(runOpts)</span>
+<span num="19">    if err != nil {</span>
+<span num="20">        t.Fatalf("Could not start resource: %s", err)</span>
+<span num="21">    }</span>
+<span num="22">    resource.Expire(30)</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">29</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Container deployment harness and testing in code</h3>
+        
+  <div class="code">
+<pre><span num="1">    defer func() {</span>
+<span num="2">        if err := pool.Purge(resource); err != nil {</span>
+<span num="3">            t.Fatalf("Could not purge resource: %s", err)</span>
+<span num="4">        }</span>
+<span num="5">    }()</span>
+<span num="6"></span>
+<span num="7">    var conn *grpc.ClientConn</span>
+<span num="8">    address := "localhost:" + resource.GetPort("9010/tcp")</span>
+<span num="9">    if err := pool.Retry(func() error {</span>
+<span num="10">        if conn != nil {</span>
+<span num="11">            return nil</span>
+<span num="12">        }</span>
+<span num="13">        var err error</span>
+<span num="14">        conn, err = grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())</span>
+<span num="15">        return err</span>
+<span num="16">    }); err != nil {</span>
+<span num="17">        t.Fatalf("Could not connect to docker: %s", err)</span>
+<span num="18">    }</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">30</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Container deployment harness and testing in code</h3>
+        
+  <div class="code">
+<pre><span num="1">    // Now you can run the code that required a gRPC connection</span>
+<span num="2">    // to Cloud Spanner, as you would in production.</span>
+<span num="3">    opts := []option.ClientOption{option.WithGRPCConn(conn)}</span>
+<span num="4">    shutdownCtx, shutdown := context.WithCancel(context.Background())</span>
+<span num="5">    project, instance, db := "project", "instance", "test-db"</span>
+<span num="6">    err := InitSpannerDB(shutdownCtx, project, instance, db, stmts, opts)</span>
+<span num="7">    require.Nil(t, err)</span>
+<span num="8"></span>
+<span num="9">    fullDBName := fmt.Sprintf("projects/%s/instances/%s/databases/%s", project, instance, db)</span>
+<span num="10"></span>
+<span num="11">    // Boom, now create the Cloud Spanner Client.</span>
+<span num="12">    sc, err := spanner.NewClient(shutdownCtx, fullDBName, opts...)</span>
+<span num="13">    require.Nil(t, err)</span>
+<span num="14">    defer func() {</span>
+<span num="15">        sc.Close()</span>
+<span num="16">        shutdown()</span>
+<span num="17">    }()</span>
+<span num="18"></span>
+<span num="19">    fnToRun(t, sc)</span>
+<span num="20">}</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">31</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Benchmarking</h2>
+      
+      <span class="pagenumber">32</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Benchmarking</h3>
+        <ul>
+<li>Performance is key for so much code out there</li>
+<li>You can't fix what you can't measure especially for expensive components</li>
+<li>Go provides first class support for benchmarking</li>
+<li>Let's look at some piece of code</li>
+</ul>
+
+  <div class="code">
+<pre><span num="1">func bytesIndex(src, query []byte) (idx int) {</span>
+<span num="2">    if len(query) == 0 {</span>
+<span num="3">        return 0</span>
+<span num="4">    }</span>
+<span num="5"></span>
+<span num="6">    for i := 0; i &lt; len(src); i++ {</span>
+<span num="7">        if len(src[i:]) &lt; len(query) {</span>
+<span num="8">            break</span>
+<span num="9">        }</span>
+<span num="10"></span>
+<span num="11">        if bytes.Equal(src[i:i+len(query)], query) {</span>
+<span num="12">            return i</span>
+<span num="13">        }</span>
+<span num="14">    }</span>
+<span num="15">    return -1</span>
+<span num="16">}</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">33</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Code review?</h3>
+        <ul>
+<li>It looks sound and it passes code review, right?</li>
+<li>Can we do much better?</li>
+<li>What if I told you that that code is quite inefficient and it’s algorithmic complexity is quadratic?</li>
+<li>How do we know if we’ve made an improvement? How can we compare its performance with that from the standard library’s bytes.Index?</li>
+<li>Answering such questions naively can cause pointless ego trips and rifts on the team. You definitely can’t answer those questions unless you have an eye for algorithms and when you make performance improvements you need to quantify them.</li>
+</ul>
+
+      
+      <span class="pagenumber">34</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Let's see the benchmarks to resolve all arguments</h3>
+        
+  <div class="code">
+<pre><span num="1">var cases = []struct {</span>
+<span num="2">    name     string</span>
+<span num="3">    src, sep []byte</span>
+<span num="4">    want     int</span>
+<span num="5">}{</span>
+<span num="6">    {"nil query", []byte("abcdefg"), nil, 0}, {"empty query", []byte("abcdefg"), []byte(""), 0},</span>
+<span num="7">    {"whitespace to search", []byte("abcdefg"), []byte(" "), -1}, {"not found", []byte("abcdefg"), []byte("xy"), -1},</span>
+<span num="8">    {"found", []byte("this is that"), []byte("that"), 8}, {"not found case mismatch", []byte("this is that"), []byte("That"), -1},</span>
+<span num="9">    {"found with spaces", []byte("     this is that"), []byte("that"), 67}, {"found with emojis", []byte("🚨this is 🚨that"), []byte("🚨that"), 12},</span>
+<span num="10">}</span>
+<span num="11"></span>
+<span num="12">var sink any</span>
+<span num="13">func benchmarkIndex(b *testing.B, fn func(src, sep []byte) int) {</span>
+<span num="14">    for i := 0; i &lt; b.N; i++ {</span>
+<span num="15">        for _, tc := range cases {</span>
+<span num="16">            got := fn(tc.src, tc.sep)</span>
+<span num="17">            if got != tc.want { b.Errorf("%q: got=%d want=%d", tc.name, got, tc.want) }</span>
+<span num="18">            sink = got</span>
+<span num="19">        }</span>
+<span num="20">    }</span>
+<span num="21">    if sink == nil {</span>
+<span num="22">        b.Fatal("Benchmark did not run")</span>
+<span num="23">    }</span>
+<span num="24">    sink = nil</span>
+<span num="25">}</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">35</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Running them</h3>
+        
+  <div class="code">
+<pre><span num="1">func BenchmarkIndexNaive(b *testing.B) {</span>
+<span num="2">    benchmarkIndex(b, bytesIndexNaive)</span>
+<span num="3">}</span>
+<span num="4">func BenchmarkIndexStdlib(b *testing.B) {</span>
+<span num="5">    benchmarkIndex(b, bytes.Index)</span>
+<span num="6">}</span>
+</pre>
+</div>
+
+  <div class="code">
+<pre><span num="1">$ go test -bench=. -benchmem -count=10</span>
+<span num="2">goos: darwin</span>
+<span num="3">goarch: amd64</span>
+<span num="4">pkg: github.com/ingenuity-build/quicksilver/testing-beefing/benchmarks</span>
+<span num="5">cpu: Intel(R) Core(TM) i7-7920HQ CPU @ 3.10GHz</span>
+<span num="6">BenchmarkIndexNaive-8         2098716           549.8 ns/op          24 B/op           3 allocs/op</span>
+<span num="7">BenchmarkIndexNaive-8         2142109           540.1 ns/op          24 B/op           3 allocs/op</span>
+<span num="8">BenchmarkIndexNaive-8         2126098           538.4 ns/op          24 B/op           3 allocs/op</span>
+<span num="9">BenchmarkIndexNaive-8         2194460           557.7 ns/op          24 B/op           3 allocs/op</span>
+<span num="10">BenchmarkIndexNaive-8         2185105           552.3 ns/op          24 B/op           3 allocs/op</span>
+<span num="11">BenchmarkIndexNaive-8         2137668           541.7 ns/op          24 B/op           3 allocs/op</span>
+<span num="12">BenchmarkIndexNaive-8         2191056           545.6 ns/op          24 B/op           3 allocs/op</span>
+<span num="13">BenchmarkIndexNaive-8         2144031           546.5 ns/op          24 B/op           3 allocs/op</span>
+<span num="14">BenchmarkIndexNaive-8         2162593           552.2 ns/op          24 B/op           3 allocs/op</span>
+<span num="15">BenchmarkIndexNaive-8         2185425           544.0 ns/op          24 B/op           3 allocs/op</span>
+<span num="16">BenchmarkIndexStdlib-8        8374387           141.2 ns/op          24 B/op           3 allocs/op</span>
+<span num="17">BenchmarkIndexStdlib-8        8466294           137.2 ns/op          24 B/op           3 allocs/op</span>
+<span num="18">BenchmarkIndexStdlib-8        8444934           147.9 ns/op          24 B/op           3 allocs/op</span>
+<span num="19">BenchmarkIndexStdlib-8        7422019           137.5 ns/op          24 B/op           3 allocs/op</span>
+<span num="20">BenchmarkIndexStdlib-8        8486536           134.6 ns/op          24 B/op           3 allocs/op</span>
+<span num="21">BenchmarkIndexStdlib-8        8304022           144.2 ns/op          24 B/op           3 allocs/op</span>
+<span num="22">BenchmarkIndexStdlib-8        8451594           142.5 ns/op          24 B/op           3 allocs/op</span>
+<span num="23">BenchmarkIndexStdlib-8        8867498           134.8 ns/op          24 B/op           3 allocs/op</span>
+<span num="24">BenchmarkIndexStdlib-8        8463555           131.4 ns/op          24 B/op           3 allocs/op</span>
+<span num="25">BenchmarkIndexStdlib-8        9168367           135.3 ns/op          24 B/op           3 allocs/op</span>
+<span num="26">PASS</span>
+<span num="27">ok      testing-beefing/benchmarks    30.728s</span>
+</pre>
+</div>
+
+      
+      <span class="pagenumber">36</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>before.txt</h3>
+        <pre><code>BenchmarkIndex-8    	 2098716	       549.8 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2142109	       540.1 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2126098	       538.4 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2194460	       557.7 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2185105	       552.3 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2137668	       541.7 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2191056	       545.6 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2144031	       546.5 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2162593	       552.2 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2185425	       544.0 ns/op	      24 B/op	       3 allocs/op
+</code></pre>
+
+      
+      <span class="pagenumber">37</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>after.txt</h3>
+        <pre><code>BenchmarkIndex-8   	 8374387	       141.2 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8466294	       137.2 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8444934	       147.9 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 7422019	       137.5 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8486536	       134.6 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8304022	       144.2 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8451594	       142.5 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8867498	       134.8 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8463555	       131.4 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 9168367	       135.3 ns/op	      24 B/op	       3 allocs/op
+</code></pre>
+
+      
+      <span class="pagenumber">38</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Benchmark shoot outs</h3>
+        <pre><code>$ benchstat before.txt after.txt 
+name     old time/op    new time/op    delta
+Index-8     547ns ± 2%     139ns ± 7%  -74.64%  (p=0.000 n=10+10)
+
+name     old alloc/op   new alloc/op   delta
+Index-8     24.0B ± 0%     24.0B ± 0%     ~     (all equal)
+
+name     old allocs/op  new allocs/op  delta
+Index-8      3.00 ± 0%      3.00 ± 0%     ~     (all equal)
+</code></pre>
+
+      
+      <span class="pagenumber">39</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Benchmarking recommendations</h3>
+        <ul>
+<li>For continuous benchmarking, we recommend Orijtech’s very own tool bencher (<em>sure this seems like a shameless plug but as of March 28th 2023, it is the only continuous benchmarking tool on the market and one that we’ve put in lots of time and expertise into refining, with dedicated quiet machines</em>) please see <a href="https://bencher.orijtech.com/" target="_blank" rel="noopener">https://bencher.orijtech.com/</a></li>
+<li>for a sample please see some graphs it generates please see <a href="https://dashboard.bencher.orijtech.com/benchmark/831d9385b36d4729a2430d1bea56538e" target="_blank" rel="noopener">https://dashboard.bencher.orijtech.com/benchmark/831d9385b36d4729a2430d1bea56538e</a> in which we have a clear win</li>
+</ul>
+
+      
+      <span class="pagenumber">40</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Benchmark result</h3>
+        <center><img width="800vh" src="./bulletProofingCodeTDD_files/bench_simplemli.png"></center>
+      
+      <span class="pagenumber">41</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Static analyzers</h3>
+        <ul>
+<li>Code that analyses the structure of your code without running it, pointing out faulty issues</li>
+<li>Go comes equipped with <code>go test</code> which has a bunch of static analyzers already included</li>
+<li>Please check out the <a href="https://pkg.go.dev/golang.org/x/tools/go/analysis" target="_blank" rel="noopener">Go static analysis package golang.orgx/tools/go/analysis</a></li>
+<li>We recommend using tools like <a href="http://127.0.0.1:3999/bulletproofing.slide" target="_blank" rel="noopener">staticcheck</a> or Orijtech's very own <a href="http://127.0.0.1:3999/bulletproofing.slide" target="_blank" rel="noopener">staticmajor</a></li>
+</ul>
+
+      
+      <span class="pagenumber">42</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Vulnerability scanners</h3>
+        <ul>
+<li>Vulnerability scanners when added to your build or continuous integration (CI) process will help you proactively flag code that's been
+crowd sourced and reported responsibly to a collection of vulnerability databases such as the National Vulnerability Database (NVD)</li>
+<li>Go provides support for the <a href="https://go.dev/blog/vuln" target="_blank" rel="noopener">Go vulnerability scanner</a> which you can add by</li>
+<li><code>go install golang.org/x/vuln/cmd/govulncheck@latest &amp;&amp; govulncheck ./...</code></li>
+<li>Cybersecurity is a continuous goal whose landscape changes every single day as more software is written, new vulnerabilities are found</li>
+</ul>
+
+      
+      <span class="pagenumber">43</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Supply chain security</h3>
+        <ul>
+<li>Most software is imported from libraries written not but us but by authors we choose to indirectly trust</li>
+<li>In an ever changing and complex world in which software changes every second, it is a huge risk that some brittle piece of code in the supply chain could be made vulnerable</li>
+<li>Please visit our page for <a href="https://cyber.orijtech.com/scsec/" target="_blank" rel="noopener">supply chain security</a></li>
+<li>A simple mutation of something like  "crypto/rand".Reader being changed in some obscure, hard to find dependency can pwn your entire program please see <a href="https://gist.github.com/odeke-em/dc1ce9f680c5bb6e17aa4e9a0a3efab9" target="_blank" rel="noopener">https://gist.github.com/odeke-em/dc1ce9f680c5bb6e17aa4e9a0a3efab9</a></li>
+</ul>
+
+      
+      <span class="pagenumber">44</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Supply chain pwn</h3>
+        
+  <div class="code playground">
+<pre><span num="1">package main</span>
+<span num="2"></span>
+<span num="3">import (</span>
+<span num="4">    "crypto/rand"</span>
+<span num="5">    "fmt"</span>
+<span num="6">    "io"</span>
+<span num="7">)</span>
+<span num="8"></span>
+<span num="9">type pwnReader int</span>
+<span num="10"></span>
+<span num="11">func (rf *pwnReader) Read(b []byte) (int, error) {</span>
+<span num="12">    for i := range b {</span>
+<span num="13">        b[i] = 0</span>
+<span num="14">    }</span>
+<span num="15">    return len(b), nil</span>
+<span num="16">}</span>
+<span num="17"></span>
+<span num="18">// Deploy the backdoor to mess up cryptography.</span>
+<span num="19">func init() { rand.Reader = new(pwnReader) }</span>
+<span num="20"></span>
+<span num="21">// Now in your main function, any call to get random bytes will always return 0x00*</span>
+<span num="22">func main() {</span>
+<span num="23">    blob, err := io.ReadAll(io.LimitReader(rand.Reader, 10))</span>
+<span num="24">    if err != nil {</span>
+<span num="25">        panic(err)</span>
+<span num="26">    }</span>
+<span num="27">    fmt.Printf("My bytes from crypto/rand.Reader:\n\t% x\n", blob)</span>
+<span num="28">}</span>
+</pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      <span class="pagenumber">45</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Introspective tooling like runtime tracing, profiling and observability</h3>
+        <ul>
+<li>Most code interactions are so complex and talk to so many other intricate pieces that it becomes cognitively prohibitive to think of what could be going wrong</li>
+<li>Runtime profiling is a powerful harness to gain insights into how your programs consume CPU time and RAM</li>
+<li>you can trigger CPU and RAM profiling by using <code>-cpuprofile=cpu_dump</code> and <code>-memprofile=ram_ dump</code> respectively</li>
+<li>Allows you to test out performance and easily hunt down what you need to fix or optimize without wasting time nor expending precious resources for code that doesn’t matter. Once you’ve collected profiles, you can run <code>go tool pprof &lt;profile_filename&gt;</code> and then analyze profiles. You can learn more about how to use pprof by visiting https://gperftools.github.io/gperftools/cpuprofile.html</li>
+<li>For runtime internals like goroutine performance, scheduler states, please use runtime/trace <a href="https://pkg.go.dev/runtime/trace" target="_blank" rel="noopener">https://pkg.go.dev/runtime/trace</a> which https://github.com/google/pprof I</li>
+<li>For observability we recommend <a href="https://opentelemetry.io/" target="_blank" rel="noopener">OpenTelemetry</a> or <a href="https://opencensus.io/" target="_blank" rel="noopener">OpenCensus</a></li>
+</ul>
+
+      
+      <span class="pagenumber">46</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Advisory</h2>
+      
+      <span class="pagenumber">47</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Remedies?</h3>
+        <ul>
+<li>Add vulnerability scanners, static analyzers, audit your dependencies</li>
+<li>Please read and understand Ken Thompson's 1984 ACM Turing Award lecture <a href="https://dl.acm.org/doi/pdf/10.1145/358198.358210" target="_blank" rel="noopener">Reflections on Trusting Trust</a></li>
+<li>Explore using companies like <a href="https://chainguard.dev/" target="_blank" rel="noopener">Chainguard Inc</a> who are experts in the field; we at Orijtech Inc use them and produced <a href="https://cyber.orijtech.com/scsec/cosmos-v1" target="_blank" rel="noopener">cosmos v1 supply chain audit</a></li>
+<li>Write defensive tests that assert on extreme conditions</li>
+<li>Learn how to use the tools, this talk should give you all the tools to be successful!</li>
+<li>Try to think like a "Hacker" (Hackers are good folks who love tinkering, not the media portrayal of malicious actors)</li>
+</ul>
+
+      
+      <span class="pagenumber">48</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Think like a Hacker, a tinkerer, curious to figure out the internals!</h3>
+        <center><img width="800vh" src="./bulletProofingCodeTDD_files/thinkLikeAHacker.png"></center>
+      
+      <span class="pagenumber">49</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Keys for success: from zero to Hero!</h3>
+        <center><img width="700vh" src="./bulletProofingCodeTDD_files/giphy(1).gif"></center>
+      
+      <span class="pagenumber">50</span>
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>References</h3>
+        <ul>
+<li><a href="https://cyber.orijtech.com/scsec/cosmos-v1" target="_blank" rel="noopener">Cosmos Supply Chain Analysis v1 2022</a>, Orijtech Inc, Chainguard Inc</li>
+<li><a href="https://orijtech.notion.site/Bullet-proofing-your-code-with-finesse-better-testing-better-skill-and-Test-Driven-Development-b3022d83c53e4cdc8bed61bdbf4618a8" target="_blank" rel="noopener">Bullet proofing your code with finesse, better testing, better skill and Test Driven Development 2023</a>, Orijtech Inc.</li>
+<li><a href="https://github.com/dvyukov/go-fuzz" target="_blank" rel="noopener">Dmitry Vyukov's go-fuzz</a></li>
+<li><a href="https://go.dev/security/fuzz/" target="_blank" rel="noopener">Go fuzzing</a></li>
+<li><a href="https://google.github.io/oss-fuzz/" target="_blank" rel="noopener">OSS Fuzz by Google LLC</a>, Google LLC</li>
+<li><a href="https://go.dev/blog/vuln" target="_blank" rel="noopener">Go vulnerability scanner</a></li>
+<li><a href="https://dl.acm.org/doi/pdf/10.1145/358198.358210" target="_blank" rel="noopener">Reflections on Trusting Trust, Ken Thompson 1984</a></li>
+<li><a href="https://cyber.orijtech.com/scsec/" target="_blank" rel="noopener">Orijtech Supply Chain Security</a></li>
+</ul>
+
+      
+      <span class="pagenumber">51</span>
+      </article>
+  
+  
+
+      <article>
+        <h3>Thank you</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Emmanuel T Odeke
+  </p>
+  
+
+  
+  <p>
+    Orijtech, Inc.
+  </p>
+  
+
+  
+  <p>
+    Mon 3 Apr 2023
+  </p>
+  
+<p class="link"><a href="mailto:emmanuel@orijtech.com" target="_blank">emmanuel@orijtech.com</a></p><p class="link"><a href="http://twitter.com/odeke_et" target="_blank">@odeke_et</a></p>
+          </div>
+        
+      </article>
+
+    <div class="slide-area" id="prev-slide-area"></div><div class="slide-area" id="next-slide-area"></div></section>
+
+    <div id="help" style="display: none;">
+      Use the left and right arrow keys or click the left and right
+      edges of the page to navigate between slides.<br>
+      (Press 'H' or navigate to hide this message.)
+    </div>
+
+    
+    <script src="./bulletProofingCodeTDD_files/play.js"></script>
+    
+
+    <script>
+      (function() {
+        
+        if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+          var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+          ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+          var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+        }
+      })();
+    </script>
+  
+
+<link rel="stylesheet" type="text/css" href="./bulletProofingCodeTDD_files/css"><link rel="stylesheet" type="text/css" href="./bulletProofingCodeTDD_files/styles.css"></body></html>

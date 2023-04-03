@@ -1,0 +1,283 @@
+# Bullet proofing your code, products with better testing, dexterity and skills/finesse
+Tags: go, testing, better skills
+
+Emmanuel T Odeke
+Orijtech, Inc.
+Mon 3 Apr 2023
+emmanuel@orijtech.com
+@odeke_et
+
+## Bullet proofing your code, with better testing, dexterity and skills/finesse
+
+## About myself
+* Emmanuel T Odeke, CEO & Chief Builder at Orijtech, Inc.
+* Core contributor to the Go programming language, observability, Cosmos-SDK and various cloud computing technologies
+* Friend and contributor to QuickSilver: delighted and thankful for your great partnership business!
+* Always learning and enjoys solving problems in all domains
+* Optimistic about the future
+* Believes in sharing as much information, skills, tips as possible to equip everyone with problem solving skills and also to learn!
+* Proponent of testing code to prevent expensive retroactive fixes
+
+## Why this talk?
+* Failures of code in production are so expensive, violating user trust, costing money, demoralizing teams, break ecosystems
+* Our cybersecurity division [cyber.orijtech.com](https://cyber.orijtech.com) audited QuickSilver's code a couple of times in 2022, 2023 and we want y'all to be successful and scale -- put ourselves out of business
+* Securing a product requires an all-inclusive mindset from the ground up
+* In most cases, security falters due to being overwhelmed, a lack of knowledge, lack of the appropriate skills, inability to focus on core business logic, fighting fires, inability to respond in a reasonable time
+* We've audited tons of code including cosmos-sdk, tendermint and related code
+* Knowledge sharing and skills imparting is something we celebrate
+* Prevent worst case scenarios by planning for them and mitigating them: stay a step ahead of disaster
+
+## Basis
+* Most of your code is written in the Go programming language
+* Regardless of language, code and products have to be tested sufficiently
+* Software development is a distributed and highly collaborative process to produce a common work output implementing business logic
+* Can't fix what you can't gauge/measure!!
+* User trust and all kinds of trust are built from reliability, beauty, good taste, pragmatic problem solving; your consumers and team know that whoever is handling something will do great at it
+* Skills division: Adam Smith put it succinctly in "Wealth of Nations" that division of labour, specialization and expertise are needed to produce high quality goods and scale them: you can't do everything
+* Disaster strikes always but what matters is the ability to get back and fix things in a timely manner
+* Curiosity killed the cat, but for humans curiosity is a marvel that will allow you to always win!
+* Everyone struggles continuously trying to have reliable and more secure products
+
+## What goes wrong?
+
+## Lack of finesse/dexterity/skill
+* Inability to bend and control your environment is a big reason why folks cut corners; they'd rather spend that time developing features that are within inches of their reach rather than banging their heads against the wall
+* This is usually the biggest problem facing most developers
+* In order for one to get their code tested, they need dexterity and knowledge of how to setup their code so that it can operate effectively
+* We want to go from zero to Hero!!
+<center><img width="240vh" src="https://media.giphy.com/media/G2MPcSmq0DZcs/giphy.gif" /></center>
+
+## Steps to getting better?
+
+## Test Driven Development
+* Software methodology in which before code is written, figure out inputs, outputs and tests for correctness
+* In practice most people conveniently write code firstly but before submitting code for code review, send related tests
+* Write as many unique tests that cover various parts of your code
+* More unique cases that take diverse paths, make your code more robust
+* Find and fix those failures before they find you
+* Crashes, panics, exploits are ways that malicious actors can get into your systems or take them out and erode user trust 
+* Rigorous testin: think of tests as a guide to make your products much safer; a cultural paradigm shift
+* Measuring rigor can happen by using the right tools to exorcise your code
+* Enables you to follow specifications and find out their limits which is much more effective than fiddling for ages
+
+## How to get there?
+
+## Unit tests
+* Unit tests ensure that specific behaviors can be empirically verified: `add(1, 10)=11`, `add(10, -11)=-1`
+* Useful as sanity tests to assert against target behavior
+* However, can be deceptively comforting given that most code is complex and the human mind usually cannot
+think of all ways to exorcise code paths and inputs
+* A group of unit tests can give some good assurances as we can enumerate as many test inputs
+* How can we scale unit testing? How do we group a collection of such tests and pass in well known inputs and assert on outputs? 
+
+## Table tests
+* Table tests are a collection of unit test inputs and desired outputs that we assert on to ensure functional integrity in a much more scalable way than just 1 unit test per function
+
+.code table_test.go
+
+## Can't fix what we can't measure :-(
+
+## Test coverage measurements
+* Unknowns beget unknowns: untested behavior is a death trap for your code in production
+* You can't fix what you can't measure!
+* Think of a way to illuminate darkness as you keep improving your test cases
+* Go has just this tool `go test -coverprofile=out.cover ./... && go tool cover -html=out.cover`
+* There are commercial tools like [codecov](https://about.codecov.io/) that you can link up to your CI/CD process to set targets for minimums required before any merge
+
+## Coverage pictorial: red uncovered, green covered by tests
+
+<center><img width="980vh" src="./interchainquery-coverage.png" /></center>
+
+## Some code review
+
+.play buggy.go
+
+## See that panic? We could patch it!
+* However, we are playing cat and mouse and as code so much more complex, we need a breath of fresh
+air that's much more scalable
+* How many failures can we spot in there immediately?
+
+## Automated and guided test coverage?
+
+## Fuzzing
+* An advanced automated testing technique that mostly operates by intelligently mutating known inputs and feeds them into code being tested, measuring changes in test coverage, watching out for panics, crashes, memory issues and other negative conditions: guided by the tester
+* Fuzzing uses the power of the repetitive nature of computers along with some guiding from a human who described a score that'll reveal negative or positive examples so that the genetic mutation algorithms can work
+* Go has native fuzzing support with the "testing" package and the "testing.F" type
+* A huge nod to the excellent [Dmitry Vyukov](https://twitter.com/dvyukov) whose pioneering work wth [dvyukov/go-fuzz](https://github.com/dvyukov/go-fuzz) has made Go so much safer and made fuzzing main stream
+* Google's [oss-fuzz](https://google.github.io/oss-fuzz/) is an excellent framework for automated fuzzing and at Orijtech Inc. put up the cosmos-sdk and tendermint plus other repositories for continuous fuzzing
+
+## Fuzzing in action
+* Following Go's guides at [testing.F]() we can write a fuzzer which we shall feed in initial inputs
+
+.code fuzz_test.go
+
+## Run the fuzzer
+.code fuzz_output.txt
+
+## Data race detector
+* Always enable `go test -race` in your Go tests
+* It'll save you tons of grief and help you catch insidious bugs!
+
+## Hermetic networking
+* Mutating, reading, erasing data in production poses financial, regulatory, privacy burdens and slow down growth and development of your business products
+* "Hermetic networking" just means isolated/controlled netwoorks that don't have to hit production environments
+* You can use a combination of mock servers, HTTP, gRPC servers, containers to run complex code all within your local network
+* Hermetic networking will allow you to get the reigns of all kinds of networks
+* Let's focus on HTTP and gRPC; same principles apply to other transports and frameworks
+
+## HTTP taming
+* As Orijtech Inc, we published in May 2020 a guide ["Taming net/http"](https://medium.com/orijtech-developers/taming-net-http-b946edfda562) which can help you get the finesse to deal with HTTP networking and help you with keeping connections within your local/hermetic network
+* With these skills you'll be able to test out your HTTP services against server specifications and not have to hit production databases
+
+## HTTP client wiring for hermetic network
+.play http_client_roundtripper.go
+
+## HTTP server wiring for hermetic network
+.play http_server.go
+
+## gRPC server wiring for hermetic network
+
+.code grpc_server.go
+
+## gRPC client wiring for hermetic network
+
+.code grpc_client.go
+
+## Container deployment harness and testing in code
+.code container_1.go
+
+## Container deployment harness and testing in code
+.code container_2.go
+
+## Container deployment harness and testing in code
+.code container_3.go
+
+## Benchmarking
+
+## Benchmarking
+* Performance is key for so much code out there
+* You can't fix what you can't measure especially for expensive components
+* Go provides first class support for benchmarking
+* Let's look at some piece of code
+
+.code bytes_naive.go
+
+## Code review?
+* It looks sound and it passes code review, right?
+* Can we do much better?
+* What if I told you that that code is quite inefficient and it’s algorithmic complexity is quadratic?
+* How do we know if we’ve made an improvement? How can we compare its performance with that from the standard library’s bytes.Index?
+* Answering such questions naively can cause pointless ego trips and rifts on the team. You definitely can’t answer those questions unless you have an eye for algorithms and when you make performance improvements you need to quantify them.
+
+## Let's see the benchmarks to resolve all arguments
+.code bench_bytes_test.go
+
+## Running them
+.code bench_bytes_benches_test.go
+.code bench_output.txt
+
+## before.txt
+```
+BenchmarkIndex-8    	 2098716	       549.8 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2142109	       540.1 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2126098	       538.4 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2194460	       557.7 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2185105	       552.3 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2137668	       541.7 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2191056	       545.6 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2144031	       546.5 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2162593	       552.2 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8    	 2185425	       544.0 ns/op	      24 B/op	       3 allocs/op
+```
+
+## after.txt
+```
+BenchmarkIndex-8   	 8374387	       141.2 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8466294	       137.2 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8444934	       147.9 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 7422019	       137.5 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8486536	       134.6 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8304022	       144.2 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8451594	       142.5 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8867498	       134.8 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 8463555	       131.4 ns/op	      24 B/op	       3 allocs/op
+BenchmarkIndex-8   	 9168367	       135.3 ns/op	      24 B/op	       3 allocs/op
+```
+
+## Benchmark shoot outs
+```
+$ benchstat before.txt after.txt 
+name     old time/op    new time/op    delta
+Index-8     547ns ± 2%     139ns ± 7%  -74.64%  (p=0.000 n=10+10)
+
+name     old alloc/op   new alloc/op   delta
+Index-8     24.0B ± 0%     24.0B ± 0%     ~     (all equal)
+
+name     old allocs/op  new allocs/op  delta
+Index-8      3.00 ± 0%      3.00 ± 0%     ~     (all equal)
+```
+
+## Benchmarking recommendations
+* For continuous benchmarking, we recommend Orijtech’s very own tool bencher (*sure this seems like a shameless plug but as of March 28th 2023, it is the only continuous benchmarking tool on the market and one that we’ve put in lots of time and expertise into refining, with dedicated quiet machines*) please see [https://bencher.orijtech.com/](https://bencher.orijtech.com/) 
+* for a sample please see some graphs it generates please see [https://dashboard.bencher.orijtech.com/benchmark/831d9385b36d4729a2430d1bea56538e](https://dashboard.bencher.orijtech.com/benchmark/831d9385b36d4729a2430d1bea56538e) in which we have a clear win
+
+## Benchmark result
+<center><img width="800vh" src="./bench_simplemli.png" /></center>
+
+## Static analyzers
+* Code that analyses the structure of your code without running it, pointing out faulty issues
+* Go comes equipped with `go test` which has a bunch of static analyzers already included
+* Please check out the [Go static analysis package golang.orgx/tools/go/analysis](https://pkg.go.dev/golang.org/x/tools/go/analysis)
+* We recommend using tools like [staticcheck]() or Orijtech's very own [staticmajor]()
+
+## Vulnerability scanners
+* Vulnerability scanners when added to your build or continuous integration (CI) process will help you proactively flag code that's been
+crowd sourced and reported responsibly to a collection of vulnerability databases such as the National Vulnerability Database (NVD)
+* Go provides support for the [Go vulnerability scanner](https://go.dev/blog/vuln) which you can add by
+* `go install golang.org/x/vuln/cmd/govulncheck@latest && govulncheck ./...`
+* Cybersecurity is a continuous goal whose landscape changes every single day as more software is written, new vulnerabilities are found
+
+## Supply chain security
+* Most software is imported from libraries written not but us but by authors we choose to indirectly trust
+* In an ever changing and complex world in which software changes every second, it is a huge risk that some brittle piece of code in the supply chain could be made vulnerable
+* Please visit our page for [supply chain security](https://cyber.orijtech.com/scsec/)
+* A simple mutation of something like  "crypto/rand".Reader being changed in some obscure, hard to find dependency can pwn your entire program please see [https://gist.github.com/odeke-em/dc1ce9f680c5bb6e17aa4e9a0a3efab9](https://gist.github.com/odeke-em/dc1ce9f680c5bb6e17aa4e9a0a3efab9)
+
+## Supply chain pwn
+.play rand_pwn.go
+
+## Introspective tooling like runtime tracing, profiling and observability
+
+* Most code interactions are so complex and talk to so many other intricate pieces that it becomes cognitively prohibitive to think of what could be going wrong
+* Runtime profiling is a powerful harness to gain insights into how your programs consume CPU time and RAM
+* you can trigger CPU and RAM profiling by using `-cpuprofile=cpu_dump` and `-memprofile=ram_ dump` respectively
+* Allows you to test out performance and easily hunt down what you need to fix or optimize without wasting time nor expending precious resources for code that doesn’t matter. Once you’ve collected profiles, you can run `go tool pprof <profile_filename>` and then analyze profiles. You can learn more about how to use pprof by visiting https://gperftools.github.io/gperftools/cpuprofile.html
+* For runtime internals like goroutine performance, scheduler states, please use runtime/trace [https://pkg.go.dev/runtime/trace](https://pkg.go.dev/runtime/trace) which https://github.com/google/pprof I
+* For observability we recommend [OpenTelemetry](https://opentelemetry.io/) or [OpenCensus](https://opencensus.io/)
+
+## Advisory
+
+## Remedies?
+* Add vulnerability scanners, static analyzers, audit your dependencies
+* Please read and understand Ken Thompson's 1984 ACM Turing Award lecture [Reflections on Trusting Trust](https://dl.acm.org/doi/pdf/10.1145/358198.358210)
+* Explore using companies like [Chainguard Inc](https://chainguard.dev) who are experts in the field; we at Orijtech Inc use them and produced [cosmos v1 supply chain audit](https://cyber.orijtech.com/scsec/cosmos-v1)
+* Write defensive tests that assert on extreme conditions
+* Learn how to use the tools, this talk should give you all the tools to be successful!
+* Try to think like a "Hacker" (Hackers are good folks who love tinkering, not the media portrayal of malicious actors)
+
+## Think like a Hacker, a tinkerer, curious to figure out the internals!
+<center><img width="800vh" src="./thinkLikeAHacker.png" /></center>
+
+## Keys for success: from zero to Hero!
+<center><img width="700vh" src="https://media.giphy.com/media/uvoECTG2uCTrG/giphy.gif" /></center>
+
+## References
+
+- [Cosmos Supply Chain Analysis v1 2022](https://cyber.orijtech.com/scsec/cosmos-v1), Orijtech Inc, Chainguard Inc
+- [Bullet proofing your code with finesse, better testing, better skill and Test Driven Development 2023](https://orijtech.notion.site/Bullet-proofing-your-code-with-finesse-better-testing-better-skill-and-Test-Driven-Development-b3022d83c53e4cdc8bed61bdbf4618a8), Orijtech Inc.
+- [Dmitry Vyukov's go-fuzz](https://github.com/dvyukov/go-fuzz)
+- [Go fuzzing](https://go.dev/security/fuzz/)
+- [OSS Fuzz by Google LLC](https://google.github.io/oss-fuzz/), Google LLC
+- [Go vulnerability scanner](https://go.dev/blog/vuln)
+- [Reflections on Trusting Trust, Ken Thompson 1984](https://dl.acm.org/doi/pdf/10.1145/358198.358210)
+- [Orijtech Supply Chain Security](https://cyber.orijtech.com/scsec/)
